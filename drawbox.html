@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+</head>
+
+<body>
+
+    <!-- Where full image is displayed, with interactive cropping -->
+    <canvas id="myCanvas" width="1067" height="600"></canvas>
+
+    <!-- set the quality of the cropped image  -->
+    <form id="qualitySlider">
+        <input type="range" id="qualityInput" name="qualityInput" value="100" />
+        <output id="qualityOutput" name="qualityOutput" for="qualityInput">100</output>%
+    </form>
+    <!-- Save button -->
+    <button style="display:block; margin-bottom:10px;" type="button" id="saveButton">Crop and save</button>
+    <!-- Displays Filesize -->
+    <div id="fileSize"><span></span></div>
+    <!-- Preview Image -->
+    <img src="" alt="" id="previewImage">
+
+
+    <!-- Script goes here. -->
+    <script>
+        const fileSizeTextEl = document.querySelector('#fileSize span');
+        const canvas = document.getElementById('myCanvas');
+        const ctx = canvas.getContext('2d');
+        const image = new Image();
+        image.src = './maxresdefault(1).jpg'; // Make sure this path is correct
+
+        const boxWidth = 800;
+        const boxHeight = 600;
+        let boxX = 100;
+        let boxY = 0;
+        let isDragging = false;
+
+        // Store the original image dimensions
+        let imgWidth, imgHeight;
+
+        function drawImageWithOverlay() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Step 1: Draw the original image scaled to fit the canvas
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            // Step 2: Draw a semi-transparent overlay over the entire image
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; // Dark overlay with 70% opacity
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Step 3: Calculate scale ratios for correct cropping
+            const xRatio = imgWidth / canvas.width;
+            const yRatio = imgHeight / canvas.height;
+
+            // Step 4: Redraw the original image ONLY in the clear box area (cropped to match the original size)
+            ctx.drawImage(
+                image,
+                boxX * xRatio, boxY * yRatio, boxWidth * xRatio, boxHeight * yRatio, // Crop from the original image
+                boxX, boxY, boxWidth, boxHeight  // Draw on the canvas at the same size
+            );
+
+            // Optional: Draw a red border around the clear box
+            // ctx.strokeStyle = 'red';
+            // ctx.lineWidth = 2;
+            // ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
+        }
+
+        image.onload = () => {
+            imgWidth = image.width;
+            imgHeight = image.height;
+
+            drawImageWithOverlay();
+        }
+
+        // Handling dragging
+        let offsetX = 0;  // Offset for dragging in the X direction
+
+        canvas.addEventListener('mousedown', (e) => {
+            const mouseX = e.offsetX;
+
+            if (
+                mouseX >= boxX &&
+                mouseX <= boxX + boxWidth
+            ) {
+                isDragging = true;
+
+                offsetX = mouseX - boxX;
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                let newPosition = e.offsetX - offsetX;  // Move horizontally
+                if (newPosition < 0) { newPosition = 0 }
+                if (newPosition > (canvas.width - boxWidth)) { newPosition = canvas.width - boxWidth }
+
+                boxX = newPosition;
+
+                drawImageWithOverlay();
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            isDragging = false;
+            captureBoxAsImage();
+        });
+
+        //save button
+        const saveButton = document.getElementById('saveButton');
+
+        saveButton.addEventListener('click', captureBoxAsImage);
+
+        function captureBoxAsImage() {
+            const xRatio = imgWidth / canvas.width;
+            const yRatio = imgHeight / canvas.height;
+
+            // Calculate the area of the original image corresponding to the box area
+            const sourceX = boxX * xRatio;
+            const sourceY = boxY * yRatio;
+            const sourceWidth = boxWidth * xRatio;
+            const sourceHeight = boxHeight * yRatio;
+
+            // Create a temporary canvas to hold the cropped area
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = boxWidth;
+            tempCanvas.height = boxHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+
+            // Draw the cropped area onto the temporary canvas
+            tempCtx.drawImage(
+                image,
+                sourceX, sourceY, sourceWidth, sourceHeight, // Cropped area from the original image
+                0, 0, boxWidth, boxHeight // Draw on the temp canvas at full size
+            );
+
+            // Convert the temporary canvas to a data URL (base64 encoded image)
+            // const imageURL = tempCanvas.toDataURL("image/png");
+
+            // const previewImage = document.getElementById('previewImage');
+
+            // if (document.body.contains(previewImage)) {
+            //     previewImage.src = imageURL;
+
+            // } else {
+            //     // create an <img> element to show the result
+            //     const resultImage = document.createElement('img');
+            //     resultImage.id = 'previewImage';
+            //     resultImage.src = imageURL;
+            //     document.body.appendChild(resultImage);
+            // }
+
+            // return imageURL; // You can also use this URL directly
+
+            tempCanvas.toBlob((blob) => {
+                console.log(blob)
+                const previewImage = document.getElementById('previewImage');
+                const imageURL = URL.createObjectURL(blob);
+
+                URL.revokeObjectURL(previewImage.src);
+                // if (document.body.contains(previewImage)) {
+                    previewImage.src = imageURL;
+
+                // } else {
+                    // create an <img> element to show the result
+                    // const resultImage = document.createElement('img');
+                    // resultImage.id = 'previewImage';
+                    // resultImage.src = imageURL;
+                    // document.body.appendChild(resultImage);
+                // }
+                
+                updateFileSizeText(blob.size); // Display filesize to user
+                
+
+            }, "image/jpeg", Number(qualityInput.value / 100));
+
+        }
+
+        // Quality slider
+        const qualityInput = document.getElementById('qualityInput');
+        const qualityOutput = document.getElementById('qualityOutput');
+        const debouncedCaptureBoxAsImage = debounce(captureBoxAsImage, 300);
+        let isMouseDown = false;
+
+        qualityInput.addEventListener('input', (e) => {
+            qualityOutput.value = qualityInput.value;
+            if(!isMouseDown) {debouncedCaptureBoxAsImage();}           
+        });
+
+        qualityInput.addEventListener('mouseup', captureBoxAsImage)
+
+        qualityInput.addEventListener('mousedown', ()=> {
+            isMouseDown = true;
+        })
+
+        document.body.addEventListener('mouseup', ()=> {
+            isMouseDown = false;
+        })
+
+
+
+        // Update filesize text
+        function updateFileSizeText(fileSize) {
+            const readableSize = humanFileSize(fileSize);
+            const text = `Cropped File Size: ${readableSize}`;
+            fileSizeTextEl.innerText = text;
+        }
+
+
+        // Helper functions
+
+        // Debounce for input events
+        // We don't want to continously create images on changing some inputs, that could be too rescource intensive
+        function debounce(callback, delay = 300) {
+                let timeoutId;
+                return function (...args) {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => callback.apply(this, args), delay);
+                };
+            }
+  
+
+        // let timeoutId;
+        // function debounce(callback, delay = 300) {
+        //     clearTimeout(timeoutId);
+        //     timeoutId = setTimeout(callback, delay)
+        // }
+
+            /**
+         * Format bytes as human-readable text.
+         * 
+         * @param bytes Number of bytes.
+         * @param si True to use metric (SI) units, aka powers of 1000. False to use 
+         *           binary (IEC), aka powers of 1024.
+         * @param dp Number of decimal places to display.
+         * 
+         * @return Formatted string.
+         */
+            function humanFileSize(bytes, si = true, dp = 1) {
+                const thresh = si ? 1000 : 1024;
+
+                if (Math.abs(bytes) < thresh) {
+                    return bytes + ' B';
+                }
+
+                const units = si
+                    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+                let u = -1;
+                const r = 10 ** dp;
+
+                do {
+                    bytes /= thresh;
+                    ++u;
+                } while (Math.round(Math.abs(bytes) * r) / r >= thresh && u < units.length - 1);
+
+
+                return bytes.toFixed(dp) + ' ' + units[u];
+            }
+    </script>
+</body>
+
+</html>
