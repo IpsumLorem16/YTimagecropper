@@ -9,21 +9,38 @@
 </head>
 
 <body>
-
-    <!-- Where full image is displayed, with interactive cropping -->
-    <canvas id="myCanvas" width="1067" height="600"></canvas>
-
-    <!-- set the quality of the cropped image  -->
-    <form id="qualitySlider">
-        <input type="range" id="qualityInput" name="qualityInput" value="100" />
-        <output id="qualityOutput" name="qualityOutput" for="qualityInput">100</output>%
-    </form>
-    <!-- Save button -->
-    <button style="display:block; margin-bottom:10px;" type="button" id="saveButton">Crop and save</button>
-    <!-- Displays Filesize -->
-    <div id="fileSize"><span></span></div>
-    <!-- Preview Image -->
-    <img src="" alt="" id="previewImage">
+    <div class="crop-wrapper">
+        <!-- Where full image is displayed, with interactive cropping -->
+        <section id="cropperTool" class="cropper-tool">
+            <div id="thumbnailSelection" class="cropper-tool__thumbnails">
+                <!-- temporary spans -->
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <canvas id="myCanvas" width="1067" height="600"></canvas>
+        </section>
+    
+        <!-- Save button -->
+        <!-- <button type="button" id="saveButton" class="save-button">Crop and save</button> -->
+    
+        <!-- Cropped Preview Image -->
+        <section class="preview">
+            <div class="preview__header">
+                <h2>Preview:</h2>
+                <!-- set the quality of the cropped image  -->
+                <form id="qualitySlider" class="quality-form">
+                    <label for="" qualityInput>Compression: </label>
+                    <input type="range" id="qualityInput" name="qualityInput" value="100" />
+                    <output id="qualityOutput" name="qualityOutput" for="qualityInput">100</output>%
+                </form>
+                <!-- Displays Filesize -->
+                <div id="fileSize" class="filesize-text"><span></span></div>
+            </div>
+            <!-- Image -->
+            <img src="" alt="" id="previewImage" class="preview-image">
+        </section>
+    </div>
 
 
     <!-- Script goes here. -->
@@ -32,7 +49,7 @@
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
         const image = new Image();
-        image.src = './maxresdefault(1).jpg'; // Make sure this path is correct
+        image.src = './maxresdefault.jpg'; // Make sure this path is correct
 
         const boxWidth = 800;
         const boxHeight = 600;
@@ -75,6 +92,7 @@
             imgHeight = image.height;
 
             drawImageWithOverlay();
+            captureBoxAsImage();
         }
 
         // Handling dragging
@@ -111,9 +129,9 @@
         });
 
         //save button
-        const saveButton = document.getElementById('saveButton');
+        // const saveButton = document.getElementById('saveButton');
 
-        saveButton.addEventListener('click', captureBoxAsImage);
+        // saveButton.addEventListener('click', captureBoxAsImage);
 
         function captureBoxAsImage() {
             const xRatio = imgWidth / canvas.width;
