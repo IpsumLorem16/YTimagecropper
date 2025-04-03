@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <div class="crop-wrapper">
+    <div class="app-wrapper">
         <!-- Where full image is displayed, with interactive cropping -->
         <section id="cropperTool" class="cropper-tool">
             <div id="thumbnailSelection" class="cropper-tool__thumbnails">
@@ -35,6 +35,7 @@
                     <output id="qualityOutput" name="qualityOutput" for="qualityInput">100%</output>
                 </form>
                 <!-- Displays Filesize -->
+                <!-- <div class="filesize-text">File Size: <span id="readableSizeText"></span></div> -->
                 <div class="filesize-text">File Size: <span id="readableSizeText"></span></div>
             </div>
             <!-- Image -->
@@ -45,6 +46,7 @@
 
     <!-- Script goes here. -->
     <script>
+        const cropperToolEl = document.getElementById('cropperTool');
         const fileSizeTextEl = document.getElementById('readableSizeText');
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
@@ -109,6 +111,7 @@
 
                 offsetX = mouseX - boxX;
             }
+            cropperToolEl.addEventListener('mouseleave', handleCropperToolMouseUp, {once:true});
         });
 
         canvas.addEventListener('mousemove', (e) => {
@@ -123,10 +126,16 @@
             }
         });
 
-        canvas.addEventListener('mouseup', (e) => {
-            isDragging = false;
-            captureBoxAsImage();
-        });
+        canvas.addEventListener('mouseup', handleCropperToolMouseUp);
+        
+
+        function handleCropperToolMouseUp() {
+            if(isDragging){
+                isDragging = false;
+                captureBoxAsImage();
+            }
+        }
+
 
         //save button
         // const saveButton = document.getElementById('saveButton');

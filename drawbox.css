@@ -3,7 +3,7 @@ body {
     background: linear-gradient(195deg, #ff00c3, #d123ba, #a42dab, #7b2f97, #552b80, #342465, #181a48, #050b2b);
 }
 
-.crop-wrapper {
+.app-wrapper {
         display: flex;
         max-width: 100%;
         flex-wrap: wrap;
@@ -55,7 +55,8 @@ section.preview {
     background: #ffffff;
     margin: 5px;
     border-radius: 6px;
-    color: #2e2b2b;    
+    color: #2e2b2b;
+    user-select: none;
 }
 
 .preview img {
