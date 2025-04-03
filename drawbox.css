@@ -49,7 +49,7 @@ section.cropper-tool {
     display: block;
     margin-bottom: 10px;
 }
-.preview {
+section.preview {
     max-width: fit-content;
     padding: 0 17px 17px 17px;
     background: #ffffff;
@@ -67,11 +67,28 @@ section.cropper-tool {
     align-items: baseline;
     justify-content: space-between;
     padding: 4px 3px 6px 0;
+    margin:5px;
+    gap:5px;
 }
 
 .preview__header h2{
     font-size: 20px;
 }
+
+.preview__header .quality-form input {
+    vertical-align: bottom;
+}
+
+.preview__header .quality-form output {
+    display: inline-block;
+    width: 39px;
+}
+
+.preview__header .filesize-text span {
+    display: inline-block;
+    min-width: 67px;
+}
+
 
 h1,
 h2,

@@ -30,12 +30,12 @@
                 <h2>Preview:</h2>
                 <!-- set the quality of the cropped image  -->
                 <form id="qualitySlider" class="quality-form">
-                    <label for="" qualityInput>Compression: </label>
+                    <label for="" qualityInput>Quality: </label>
                     <input type="range" id="qualityInput" name="qualityInput" value="100" />
-                    <output id="qualityOutput" name="qualityOutput" for="qualityInput">100</output>%
+                    <output id="qualityOutput" name="qualityOutput" for="qualityInput">100%</output>
                 </form>
                 <!-- Displays Filesize -->
-                <div id="fileSize" class="filesize-text"><span></span></div>
+                <div class="filesize-text">File Size: <span id="readableSizeText"></span></div>
             </div>
             <!-- Image -->
             <img src="" alt="" id="previewImage" class="preview-image">
@@ -45,7 +45,7 @@
 
     <!-- Script goes here. -->
     <script>
-        const fileSizeTextEl = document.querySelector('#fileSize span');
+        const fileSizeTextEl = document.getElementById('readableSizeText');
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
         const image = new Image();
@@ -205,7 +205,7 @@
         let isMouseDown = false;
 
         qualityInput.addEventListener('input', (e) => {
-            qualityOutput.value = qualityInput.value;
+            qualityOutput.value = `${qualityInput.value}%`
             if(!isMouseDown) {debouncedCaptureBoxAsImage();}           
         });
 
@@ -224,8 +224,7 @@
         // Update filesize text
         function updateFileSizeText(fileSize) {
             const readableSize = humanFileSize(fileSize);
-            const text = `Cropped File Size: ${readableSize}`;
-            fileSizeTextEl.innerText = text;
+            fileSizeTextEl.innerText = readableSize;
         }
 
 
