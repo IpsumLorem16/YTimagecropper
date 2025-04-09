@@ -24,21 +24,22 @@ section.cropper-tool {
     margin-bottom:6px;
 }
 
-.cropper-tool__thumbnails span {
+.cropper-tool__thumbnails span, .cropper-tool__thumbnails img  {
     width: 150px;
     height: 150px;
     display: inline-block;
     background: #979797;
 }
 
-.cropper-tool__thumbnails span:nth-of-type(1) {
+/* .cropper-tool__thumbnails span:nth-of-type(1) {
     background: #87836c;
-}
+} */
 
 .cropper-tool canvas {
     max-width:100%;
     width:800px;
     display:block;
+    background-color:#979797;
 }
 
 .quality-form {
@@ -90,6 +91,9 @@ section.preview {
     min-width: 67px;
 }
 
+.hidden {
+    display: none !important;
+}
 
 h1,
 h2,
