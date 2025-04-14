@@ -24,8 +24,26 @@ section.cropper-tool {
     margin-bottom:6px;
 }
 
-.cropper-tool__thumbnails span, .cropper-tool__thumbnails img  {
+.cropper-tool__thumbnails img {
+    width: fit-content;
+    transform: translateX(-25%);
+}
+
+.cropper-tool__thumbnails span {
+    overflow: hidden;
     width: 150px;
+    cursor: pointer;
+    filter: brightness(0.6);
+}
+
+.cropper-tool__thumbnails span.selected {
+    outline: 5px solid #83838382;
+    outline-offset: 3px;
+    outline-style: dashed;
+    filter: brightness(1);
+}
+
+.cropper-tool__thumbnails span, .cropper-tool__thumbnails img  {
     height: 150px;
     display: inline-block;
     background: #979797;

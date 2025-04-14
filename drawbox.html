@@ -13,14 +13,10 @@
         <!-- Where full image is displayed, with interactive cropping -->
         <section id="cropperTool" class="cropper-tool">
             <div id="thumbnailSelection" class="cropper-tool__thumbnails">
-                <!-- temporary spans -->
-                <span></span>
-                <span></span>
-                <span></span>
-                <!-- images (hidden until src loaded)-->
-                <img src="" alt="" class="hidden">
-                <img src="" alt="" class="hidden">
-                <img src="" alt="" class="hidden">
+                <!-- thumbnails -->
+                <span><img src="" alt="" class="hidden"></span>
+                <span><img src="" alt="" class="hidden"></span>
+                <span><img src="" alt="" class="hidden"></span>
             </div>
             <canvas id="myCanvas" width="1067" height="600"></canvas>
         </section>
@@ -35,8 +31,8 @@
                 <!-- set the quality of the cropped image  -->
                 <form id="qualitySlider" class="quality-form">
                     <label for="" qualityInput>Quality: </label>
-                    <input type="range" id="qualityInput" name="qualityInput" value="100" />
-                    <output id="qualityOutput" name="qualityOutput" for="qualityInput">100%</output>
+                    <input type="range" id="qualityInput" name="qualityInput" value="90" />
+                    <output id="qualityOutput" name="qualityOutput" for="qualityInput">90%</output>
                 </form>
                 <!-- Displays Filesize -->
                 <!-- <div class="filesize-text">File Size: <span id="readableSizeText"></span></div> -->
@@ -55,8 +51,10 @@
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
         let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault(2).jpg', './videoThumbnails/maxresdefault(3).jpg']; 
-        const image = new Image();
-        image.src = imageUrls[0]; // Make sure this path is correct
+        let images = [];
+        // const image = new Image(); // commented out for testing multi-image loading
+        // image.src = imageUrls[0]; // Make sure this path is correct  // commented out for testing multi-image loading
+        let selectedImage = new Image();
 
         const boxWidth = 800;
         const boxHeight = 600;
@@ -71,7 +69,8 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             // Step 1: Draw the original image scaled to fit the canvas
-            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            // ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(selectedImage, 0, 0, canvas.width, canvas.height);
 
             // Step 2: Draw a semi-transparent overlay over the entire image
             ctx.fillStyle = 'rgba(0, 0, 0, 0.7)'; // Dark overlay with 70% opacity
@@ -83,7 +82,7 @@
 
             // Step 4: Redraw the original image ONLY in the clear box area (cropped to match the original size)
             ctx.drawImage(
-                image,
+                selectedImage,
                 boxX * xRatio, boxY * yRatio, boxWidth * xRatio, boxHeight * yRatio, // Crop from the original image
                 boxX, boxY, boxWidth, boxHeight  // Draw on the canvas at the same size
             );
@@ -94,13 +93,22 @@
             // ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         }
 
-        image.onload = () => {
-            imgWidth = image.width;
-            imgHeight = image.height;
+        // commented out for testing multi-image loading
+        // image.onload = () => {
+        //     imgWidth = image.width;
+        //     imgHeight = image.height;
 
-            drawImageWithOverlay();
-            captureBoxAsImage();
-        }
+        //     drawImageWithOverlay();
+        //     captureBoxAsImage();
+        // }
+
+         selectedImage.onload = () => {
+             imgWidth = selectedImage.width;
+             imgHeight = selectedImage.height;
+
+             drawImageWithOverlay();
+             captureBoxAsImage();
+         }
 
         // Handling dragging
         let offsetX = 0;  // Offset for dragging in the X direction
@@ -165,7 +173,8 @@
 
             // Draw the cropped area onto the temporary canvas
             tempCtx.drawImage(
-                image,
+                // image,
+                selectedImage,
                 sourceX, sourceY, sourceWidth, sourceHeight, // Cropped area from the original image
                 0, 0, boxWidth, boxHeight // Draw on the temp canvas at full size
             );
@@ -212,14 +221,6 @@
 
         }
 
-        function initiateCropper(image) {
-            imgWidth = image.width;
-            imgHeight = image.height;
-
-            drawImageWithOverlay();
-            captureBoxAsImage();
-        }
-
         //load images
         // let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault.jpg(1)', './videoThumbnails/maxresdefault(3).jpg']; 
         let hasFirstImgLoaded = false;
@@ -229,6 +230,7 @@
                 const img = new Image();
                 img.src = url;       
                 img.onload = () => {
+                    images.push(img);
                     const isFirst = hasFirstImgLoaded ? false : true;
                     if (isFirst) hasFirstImgLoaded = true;
                     resolve({url, image:img, isFirst})
@@ -237,19 +239,43 @@
             })
         }
         function handleFirstImageLoaded(image) {
-            console.log('First image!!!:' + image.url);
+            selectImage(image, );
+            addCropperThumbnail(image.url)
+                .classList.add('selected');
         }
 
         function handleImageLoaded(image) {
-            console.log('image Loaded' + image.url);
+            // console.log('image Loaded' + image.url);
+            // console.log(images)
         }
 
         imageUrls.map(url => loadImage(url)
             .then(image => {
-                image.isFirst ? handleFirstImageLoaded(image) : handleImageLoaded(image);
+                // image.isFirst ? handleFirstImageLoaded(image) : handleImageLoaded(image);
+                image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
             })
         );
 
+        function addCropperThumbnail(imageUrl) {
+            const thumbEl = document.querySelector('.cropper-tool__thumbnails img.hidden:nth-of-type(1)'); //select first hidden thumbnail image.
+            thumbEl.src = imageUrl;
+            thumbEl.classList.remove('hidden');
+
+            thumbEl.addEventListener('click', (e)=> {
+                const target = e.target;
+                console.log(target)
+                selectImage(target.src, target.parentNode)
+            })
+            return thumbEl.parentNode;
+        }
+
+        function selectImage(image, thumbnailEl){
+            selectedImage.src = image.url || image || image.src;
+            if(thumbnailEl) {
+                thumbnailEl.parentNode.querySelector('.selected').classList.remove('selected');
+                thumbnailEl.classList.add('selected');
+            }
+        }
         // Quality slider
         const qualityInput = document.getElementById('qualityInput');
         const qualityOutput = document.getElementById('qualityOutput');
