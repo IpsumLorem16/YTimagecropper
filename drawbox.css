@@ -17,11 +17,20 @@ section.cropper-tool {
     border-radius: 6px;
 }
 
+section.cropper-tool.grabbing {
+    cursor: grabbing !important;
+}
+
+section.cropper-tool.grabbing .cropper-tool__thumbnails {
+    pointer-events: none;
+}
+
 .cropper-tool__thumbnails {
     padding: 12px;
     display: flex;
     justify-content: space-evenly;
     margin-bottom:6px;
+    user-select: none;
 }
 
 .cropper-tool__thumbnails img {

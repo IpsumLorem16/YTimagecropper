@@ -110,8 +110,11 @@
                 isDragging = true;
                 offsetX = mouseX - boxX;
                 canvas.style.cursor = 'grabbing';
+                // cropperToolEl.style.cursor = 'grabbing';
+                cropperToolEl.classList.add('grabbing');
             }
             cropperToolEl.addEventListener('mouseleave', handleCropperToolMouseUp, {once:true});
+            document.body.addEventListener('mouseup', handleCropperToolMouseUp, {once:true});
         });
 
         // mousemove
@@ -126,6 +129,8 @@
             // Change cursor only when hovering over the box
             canvas.style.cursor = isOverBox ? 'grab' : 'default';
 
+            
+
             if (isDragging) {
                 let newPosition = mouseX - offsetX;
                 if (newPosition < 0) { newPosition = 0 }
@@ -138,12 +143,14 @@
         });
 
         // mouseup
-        canvas.addEventListener('mouseup', handleCropperToolMouseUp);
+        // canvas.addEventListener('mouseup', handleCropperToolMouseUp);
         
         function handleCropperToolMouseUp() {
             if(isDragging){
                 isDragging = false;
                 captureBoxAsImage();
+                // cropperToolEl.style.cursor = 'default';
+                cropperToolEl.classList.remove('grabbing');
             }
         }
 
