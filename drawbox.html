@@ -52,8 +52,6 @@
         const ctx = canvas.getContext('2d');
         let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault(2).jpg', './videoThumbnails/maxresdefault(3).jpg']; 
         let images = [];
-        // const image = new Image(); // commented out for testing multi-image loading
-        // image.src = imageUrls[0]; // Make sure this path is correct  // commented out for testing multi-image loading
         let selectedImage = new Image();
 
         const boxWidth = 800;
@@ -65,6 +63,7 @@
         // Store the original image dimensions
         let imgWidth, imgHeight;
 
+        // Add selected image to canvas in cropper tool area.
         function drawImageWithOverlay() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -93,26 +92,24 @@
             // ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         }
 
-        // commented out for testing multi-image loading
-        // image.onload = () => {
-        //     imgWidth = image.width;
-        //     imgHeight = image.height;
+        // Changes image in cropper when 'selected Image' src changes.
+        selectedImage.onload = () => {
+            imgWidth = selectedImage.width;
+            imgHeight = selectedImage.height;
 
-        //     drawImageWithOverlay();
-        //     captureBoxAsImage();
-        // }
+            drawImageWithOverlay();
+            captureBoxAsImage();
+        }
 
-         selectedImage.onload = () => {
-             imgWidth = selectedImage.width;
-             imgHeight = selectedImage.height;
+       /*
+        *  Cropper logic
+        *  Add interactivity to canvas cropper tool
+        *  Allows user to drag selected area within canvas.
+        */
 
-             drawImageWithOverlay();
-             captureBoxAsImage();
-         }
-
-        // Handling dragging
         let offsetX = 0;  // Offset for dragging in the X direction
 
+        // mousedown
         canvas.addEventListener('mousedown', (e) => {
             const mouseX = e.offsetX;
 
@@ -127,6 +124,7 @@
             cropperToolEl.addEventListener('mouseleave', handleCropperToolMouseUp, {once:true});
         });
 
+        // mousemove
         canvas.addEventListener('mousemove', (e) => {
             if (isDragging) {
                 let newPosition = e.offsetX - offsetX;  // Move horizontally
@@ -139,9 +137,9 @@
             }
         });
 
+        // mouseup
         canvas.addEventListener('mouseup', handleCropperToolMouseUp);
         
-
         function handleCropperToolMouseUp() {
             if(isDragging){
                 isDragging = false;
@@ -149,12 +147,10 @@
             }
         }
 
-
-        //save button
-        // const saveButton = document.getElementById('saveButton');
-
-        // saveButton.addEventListener('click', captureBoxAsImage);
-
+       /* 
+        * Create jpg
+        * From selected area and display in 'preview'
+        */
         function captureBoxAsImage() {
             const xRatio = imgWidth / canvas.width;
             const yRatio = imgHeight / canvas.height;
@@ -173,58 +169,47 @@
 
             // Draw the cropped area onto the temporary canvas
             tempCtx.drawImage(
-                // image,
                 selectedImage,
                 sourceX, sourceY, sourceWidth, sourceHeight, // Cropped area from the original image
                 0, 0, boxWidth, boxHeight // Draw on the temp canvas at full size
             );
 
-            // Convert the temporary canvas to a data URL (base64 encoded image)
-            // const imageURL = tempCanvas.toDataURL("image/png");
-
-            // const previewImage = document.getElementById('previewImage');
-
-            // if (document.body.contains(previewImage)) {
-            //     previewImage.src = imageURL;
-
-            // } else {
-            //     // create an <img> element to show the result
-            //     const resultImage = document.createElement('img');
-            //     resultImage.id = 'previewImage';
-            //     resultImage.src = imageURL;
-            //     document.body.appendChild(resultImage);
-            // }
-
-            // return imageURL; // You can also use this URL directly
-
+            // Convert the temporary canvas to a blob url
             tempCanvas.toBlob((blob) => {
-                // console.log(blob)
                 const previewImage = document.getElementById('previewImage');
                 const imageURL = URL.createObjectURL(blob);
 
                 URL.revokeObjectURL(previewImage.src);
-                // if (document.body.contains(previewImage)) {
                     previewImage.src = imageURL;
-
-                // } else {
-                    // create an <img> element to show the result
-                    // const resultImage = document.createElement('img');
-                    // resultImage.id = 'previewImage';
-                    // resultImage.src = imageURL;
-                    // document.body.appendChild(resultImage);
-                // }
                 
-                updateFileSizeText(blob.size); // Display filesize to user
-                
+                updateFileSizeText(blob.size); // Display filesize to user       
 
             }, "image/jpeg", Number(qualityInput.value / 100));
 
         }
 
-        //load images
-        // let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault.jpg(1)', './videoThumbnails/maxresdefault(3).jpg']; 
+        /* Update filesize text */
+            function updateFileSizeText(fileSize) {
+                const readableSize = humanFileSize(fileSize);
+                fileSizeTextEl.innerText = readableSize;
+            }
+
+       /* 
+        *  Load Images
+        *
+        *  Pre-Loads images from url array, create new image object for each.
+        *  Also populate thumbnails in cropper tool.
+        */
         let hasFirstImgLoaded = false;
 
+        // When each image loaded, conditionally do something (depending on if it was loaded first)
+        imageUrls.map(url => loadImage(url)
+            .then(image => {
+                image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
+            })
+        );
+
+        // Preload supplied image, and push to array.
         function loadImage(url){
             return new Promise((resolve, reject)=> {
                 const img = new Image();
@@ -232,30 +217,21 @@
                 img.onload = () => {
                     images.push(img);
                     const isFirst = hasFirstImgLoaded ? false : true;
-                    if (isFirst) hasFirstImgLoaded = true;
+                    if (isFirst) hasFirstImgLoaded = true; // set boolean var, if this was the first image loaded
                     resolve({url, image:img, isFirst})
                 };
                 img.onerror = reject;               
             })
         }
+
+        // Handle the first loaded image
         function handleFirstImageLoaded(image) {
             selectImage(image, );
             addCropperThumbnail(image.url)
                 .classList.add('selected');
         }
 
-        function handleImageLoaded(image) {
-            // console.log('image Loaded' + image.url);
-            // console.log(images)
-        }
-
-        imageUrls.map(url => loadImage(url)
-            .then(image => {
-                // image.isFirst ? handleFirstImageLoaded(image) : handleImageLoaded(image);
-                image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
-            })
-        );
-
+        // Add thumbnail (from pre-loaded image) in cropper.
         function addCropperThumbnail(imageUrl) {
             const thumbEl = document.querySelector('.cropper-tool__thumbnails img.hidden:nth-of-type(1)'); //select first hidden thumbnail image.
             thumbEl.src = imageUrl;
@@ -263,12 +239,12 @@
 
             thumbEl.addEventListener('click', (e)=> {
                 const target = e.target;
-                console.log(target)
                 selectImage(target.src, target.parentNode)
             })
             return thumbEl.parentNode;
         }
 
+        // Select image, changes current image in cropper.
         function selectImage(image, thumbnailEl){
             selectedImage.src = image.url || image || image.src;
             if(thumbnailEl) {
@@ -276,7 +252,12 @@
                 thumbnailEl.classList.add('selected');
             }
         }
-        // Quality slider
+
+       /*
+        *  Quality slider.
+        *
+        *  Set quality of final Cropped image.jpg (in perecentage).
+        */
         const qualityInput = document.getElementById('qualityInput');
         const qualityOutput = document.getElementById('qualityOutput');
         const debouncedCaptureBoxAsImage = debounce(captureBoxAsImage, 300);
@@ -298,15 +279,9 @@
         })
 
 
-
-        // Update filesize text
-        function updateFileSizeText(fileSize) {
-            const readableSize = humanFileSize(fileSize);
-            fileSizeTextEl.innerText = readableSize;
-        }
-
-
-        // Helper functions
+       /* 
+        *  Helper functions 
+        */
 
         // Debounce for input events
         // We don't want to continously create images on changing some inputs, that could be too rescource intensive
@@ -318,12 +293,6 @@
                 };
             }
   
-
-        // let timeoutId;
-        // function debounce(callback, delay = 300) {
-        //     clearTimeout(timeoutId);
-        //     timeoutId = setTimeout(callback, delay)
-        // }
 
             /**
          * Format bytes as human-readable text.
