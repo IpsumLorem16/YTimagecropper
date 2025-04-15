@@ -92,15 +92,6 @@
             // ctx.strokeRect(boxX, boxY, boxWidth, boxHeight);
         }
 
-        // Changes image in cropper when 'selected Image' src changes.
-        selectedImage.onload = () => {
-            imgWidth = selectedImage.width;
-            imgHeight = selectedImage.height;
-
-            drawImageWithOverlay();
-            captureBoxAsImage();
-        }
-
        /*
         *  Cropper logic
         *  Add interactivity to canvas cropper tool
@@ -241,6 +232,14 @@
                 selectImage(target.src, target.parentNode)
             })
             return thumbEl.parentNode;
+        }
+
+        // Add event listener for 'selected image'.
+        selectedImage.onload = () => {
+            imgWidth = selectedImage.width;
+            imgHeight = selectedImage.height;
+            drawImageWithOverlay();
+            captureBoxAsImage();
         }
 
         // Select image, changes current image in cropper.
