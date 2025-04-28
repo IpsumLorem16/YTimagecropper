@@ -10,36 +10,59 @@
 
 <body>
     <div class="app-wrapper">
-        <!-- Where full image is displayed, with interactive cropping -->
-        <section id="cropperTool" class="cropper-tool">
-            <div id="thumbnailSelection" class="cropper-tool__thumbnails">
+        <div class="group-wrapper">
+            <!-- Where full image is displayed, with interactive cropping -->
+            <section id="cropperTool" class="cropper-tool">
+                <div id="thumbnailSelection" class="cropper-tool__thumbnails">
+                    <!-- thumbnails -->
+                    <span><img src="" alt="" class="hidden"></span>
+                    <span><img src="" alt="" class="hidden"></span>
+                    <span><img src="" alt="" class="hidden"></span>
+                </div>
+                <canvas id="myCanvas" width="1067" height="600"></canvas>
+            </section>
+        
+            <!-- Save button -->
+            <!-- <button type="button" id="saveButton" class="save-button">Crop and save</button> -->
+        
+            <!-- Cropped Preview Image -->
+            <section class="preview">
+                <div class="preview__header">
+                    <h2>Preview:</h2>
+                    <!-- set the quality of the cropped image  -->
+                    <form id="qualitySlider" class="quality-form">
+                        <label for="" qualityInput>Quality: </label>
+                        <input type="range" id="qualityInput" name="qualityInput" value="90" />
+                        <output id="qualityOutput" name="qualityOutput" for="qualityInput">90%</output>
+                    </form>
+                    <!-- Displays Filesize -->
+                    <!-- <div class="filesize-text">File Size: <span id="readableSizeText"></span></div> -->
+                    <div class="filesize-text">File Size: <span id="readableSizeText"></span></div>
+                </div>
+                <!-- Image -->
+                <div class="preview__wrapper">
+                    <img src="" alt="" id="previewImage" class="preview-image">
+                    <!-- Save button -->
+                    <button type="button" id="saveButton" class="save-button">
+                        <span class="save-button__icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M48 96l0 320c0 8.8 7.2 16 16 16l320 0c8.8 0 16-7.2 16-16l0-245.5c0-4.2-1.7-8.3-4.7-11.3l33.9-33.9c12 12 18.7 28.3 18.7 45.3L448 416c0 35.3-28.7 64-64 64L64 480c-35.3 0-64-28.7-64-64L0 96C0 60.7 28.7 32 64 32l245.5 0c17 0 33.3 6.7 45.3 18.7l74.5 74.5-33.9 33.9L320.8 84.7c-.3-.3-.5-.5-.8-.8L320 184c0 13.3-10.7 24-24 24l-192 0c-13.3 0-24-10.7-24-24L80 80 64 80c-8.8 0-16 7.2-16 16zm80-16l0 80 144 0 0-80L128 80zm32 240a64 64 0 1 1 128 0 64 64 0 1 1 -128 0z"/></svg>
+                        </span>
+                    </button>
+                </div>
+            </section>
+        </div>
+
+        <!-- Saved images -->
+        <section id="savedImages" class="saved-images">
+            <div class="saved-images__header">
+                <h2>Saved images:</h2>
+            </div>
+            <div class="saved-images__thumbnails">
                 <!-- thumbnails -->
                 <span><img src="" alt="" class="hidden"></span>
                 <span><img src="" alt="" class="hidden"></span>
                 <span><img src="" alt="" class="hidden"></span>
             </div>
-            <canvas id="myCanvas" width="1067" height="600"></canvas>
-        </section>
-    
-        <!-- Save button -->
-        <!-- <button type="button" id="saveButton" class="save-button">Crop and save</button> -->
-    
-        <!-- Cropped Preview Image -->
-        <section class="preview">
-            <div class="preview__header">
-                <h2>Preview:</h2>
-                <!-- set the quality of the cropped image  -->
-                <form id="qualitySlider" class="quality-form">
-                    <label for="" qualityInput>Quality: </label>
-                    <input type="range" id="qualityInput" name="qualityInput" value="90" />
-                    <output id="qualityOutput" name="qualityOutput" for="qualityInput">90%</output>
-                </form>
-                <!-- Displays Filesize -->
-                <!-- <div class="filesize-text">File Size: <span id="readableSizeText"></span></div> -->
-                <div class="filesize-text">File Size: <span id="readableSizeText"></span></div>
-            </div>
-            <!-- Image -->
-            <img src="" alt="" id="previewImage" class="preview-image">
         </section>
     </div>
 
