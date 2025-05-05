@@ -58,10 +58,6 @@
                 <h2>Saved images:</h2>
             </div>
             <div class="saved-images__thumbnails">
-                <!-- thumbnails -->
-                <span><img src="" alt="" class="hidden"></span>
-                <span><img src="" alt="" class="hidden"></span>
-                <span><img src="" alt="" class="hidden"></span>
             </div>
         </section>
     </div>
@@ -73,6 +69,8 @@
         const fileSizeTextEl = document.getElementById('readableSizeText');
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
+        const previewImage = document.getElementById('previewImage');
+        let isPreviewImageSaved = false; //prevent current preview image being 'deleted' (blob url revoked) if user has saved it.
         let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault(2).jpg', './videoThumbnails/maxresdefault(3).jpg']; 
         let images = [];
         let selectedImage = new Image();
@@ -218,13 +216,15 @@
 
             // Convert the temporary canvas to a blob url
             tempCanvas.toBlob((blob) => {
-                const previewImage = document.getElementById('previewImage');
                 const imageURL = URL.createObjectURL(blob);
 
-                URL.revokeObjectURL(previewImage.src);
-                    previewImage.src = imageURL;
+                if (!isPreviewImageSaved) {
+                    URL.revokeObjectURL(previewImage.src);
+                } 
+                previewImage.src = imageURL;
                 
                 updateFileSizeText(blob.size); // Display filesize to user       
+                isPreviewImageSaved = false;
 
             }, "image/jpeg", Number(qualityInput.value / 100));
 
@@ -326,6 +326,54 @@
             isMouseDown = false;
         })
 
+       /*
+        *  Save Image
+        *  Saves the cropped image from the preview window, and diplays in saved images.
+        */
+        const saveButtonEl = document.getElementById('saveButton');
+        const savedThumbsEl = document.querySelector('.saved-images__thumbnails');
+
+        const savedImages =[];
+
+        saveButtonEl.addEventListener('click', handleSaveBtnClick);
+
+        function handleSaveBtnClick(e) {
+            // show save effect/popup
+            addSavedImgThumbnail(previewImage);
+            saveImage(previewImage);
+            
+        }
+
+        // save image
+        function saveImage(image) {
+            isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
+            savedImages.push(image.src);
+        }
+
+        // add saved image to 'saved images' element.
+        function addSavedImgThumbnail(image) {
+            const imgWraperEl = document.createElement('span');
+            const imgEl = document.createElement('img');
+
+            imgEl.src = image.src;
+
+            imgWraperEl.className = 'img-wrapper';
+            imgWraperEl.appendChild(imgEl);
+
+            savedThumbsEl.prepend(imgWraperEl);
+
+        }
+
+        // Display saved image in preview area.
+        function previewSavedImg(image) {
+
+        }
+
+        // Delete saved image, and remove from display.
+        function deleteSavedImg(image) {
+
+        }
+        
 
        /* 
         *  Helper functions 
