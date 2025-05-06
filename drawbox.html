@@ -57,9 +57,63 @@
             <div class="saved-images__header">
                 <h2>Saved images:</h2>
             </div>
-            <div class="saved-images__thumbnails">
+
+            <!-- Thumbnails container (make sure no whitespace for :empty psuedoclass to work) -->
+            <div class="saved-images__thumbnails"></div>
+
+            <!-- Thumbnails container  with images for testing -->
+            <!-- <div class="saved-images__thumbnails"> -->
+
+                <!-- <span class="img-wrapper"><img src="test.jpg">
+                    <div class="img-wrapper__controls">
+                        <button type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+                                <path
+                                    d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z" />
+                            </svg>
+                        </button>
+                    </div>
+                </span>
+
+                <span class="img-wrapper">
+                    <img src="test2.jpg">
+                    <div class="img-wrapper__controls">
+                        <button type="button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                <path
+                                    d="M135.2 17.7L128 32 32 32C14.3 32 0 46.3 0 64S14.3 96 32 96l384 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-96 0-7.2-14.3C307.4 6.8 296.3 0 284.2 0L163.8 0c-12.1 0-23.2 6.8-28.6 17.7zM416 128L32 128 53.2 467c1.6 25.3 22.6 45 47.9 45l245.8 0c25.3 0 46.3-19.7 47.9-45L416 128z" />
+                            </svg>
+                        </button>
+                    </div>
+                </span>
+                <span class="img-wrapper">
+                    <img src="test3.jpg">
+                    <div class="img-wrapper__controls">
+                        <button type="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                                <path
+                                    d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
+                            </svg>
+                        </button>
+                    </div>
+                </span>
+            </div> -->
+            
+
+            <!-- Image controls (for cloning into thumbnails)-->
+            <div class="hidden-controls">
+                <div class="img-wrapper__controls" id="savedImageControls">
+                    <button type="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
+                            <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+                            <path
+                                d="M135.2 17.7C140.6 6.8 151.7 0 163.8 0L284.2 0c12.1 0 23.2 6.8 28.6 17.7L320 32l96 0c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 7.2-14.3zM32 128l384 0 0 320c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-320zm96 64c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16zm96 0c-8.8 0-16 7.2-16 16l0 224c0 8.8 7.2 16 16 16s16-7.2 16-16l0-224c0-8.8-7.2-16-16-16z" />
+                        </svg>
+                    </button>
             </div>
+            
         </section>
+
     </div>
 
 
@@ -332,7 +386,7 @@
         */
         const saveButtonEl = document.getElementById('saveButton');
         const savedThumbsEl = document.querySelector('.saved-images__thumbnails');
-
+        const savedControlsEl = document.getElementById('savedImageControls');
         const savedImages =[];
 
         saveButtonEl.addEventListener('click', handleSaveBtnClick);
@@ -354,11 +408,13 @@
         function addSavedImgThumbnail(image) {
             const imgWraperEl = document.createElement('span');
             const imgEl = document.createElement('img');
+            const controlEl = savedControlsEl.cloneNode(true);
 
             imgEl.src = image.src;
 
             imgWraperEl.className = 'img-wrapper';
             imgWraperEl.appendChild(imgEl);
+            imgWraperEl.appendChild(controlEl);
 
             savedThumbsEl.prepend(imgWraperEl);
 
@@ -366,7 +422,7 @@
 
         // Display saved image in preview area.
         function previewSavedImg(image) {
-
+            isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
         }
 
         // Delete saved image, and remove from display.

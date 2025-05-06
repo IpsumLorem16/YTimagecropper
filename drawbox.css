@@ -139,10 +139,12 @@ section.preview {
     right: 20px;
     /* style */
     padding: 10px 20px;
+    border-radius: 6px;
     color: white;
     border: none;
     background: rgb(0 0 0 / 65%);
     cursor: pointer;
+    backdrop-filter: blur(4px);
     /* animation */
     visibility: hidden; 
     opacity:0;
@@ -199,11 +201,18 @@ section.saved-images {
     overflow-y: hidden;
 }
 
+.saved-images__thumbnails:empty {
+    min-height: 180px;
+    margin-bottom: 10px;
+    box-shadow: inset 1px 2px 20px 8px #f3f3f3;
+}
+
 .saved-images__thumbnails .img-wrapper {
     display: block;
+    position: relative;
     width: 240px;
     height:180px;
-    margin-right:10px;
+    margin-right:15px;
     margin-bottom: 10px;
     flex-shrink: 0;
 }
@@ -213,11 +222,60 @@ section.saved-images {
     height:100%;
 }
 
-.saved-images__thumbnails:empty {
-    min-height:180px;
-    margin-bottom: 10px;
-    box-shadow: inset 1px 2px 20px 8px #f3f3f3;
+.saved-images__thumbnails .img-wrapper__controls {
+    position: absolute;
+    display: inline-flex;
+    top: 6px;
+    right: 6px;
+   
 }
+
+.saved-images__thumbnails .img-wrapper:hover .img-wrapper__controls button {
+    /* animation */
+    visibility: visible;
+    opacity: 1;
+    transition: opacity 0.11s ease, visibility 0.11s;
+}
+
+.saved-images__thumbnails .img-wrapper__controls button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: rgb(0 0 0 / 65%);
+    width: 35px;
+    height: 35px;
+    border-radius: 3px;
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    /* animation */
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.16s ease-in, visibility 0.16s;
+}
+
+.saved-images__thumbnails .img-wrapper__controls button:hover {
+    background: rgb(0 0 0 / 79%);
+}
+
+
+.saved-images__thumbnails .img-wrapper__controls button:active {
+    filter: saturate(0.7);
+}
+
+.saved-images__thumbnails .img-wrapper__controls button svg {
+    width:14px;
+    fill:rgb(240, 39, 39);
+    fill:rgb(240 39 39 / 93%)
+}
+.saved-images__thumbnails .img-wrapper__controls button:hover svg {
+    fill: rgb(243, 12, 12);
+}
+
+.saved-images .hidden-controls {
+    display:none;
+}
+
 
 /* helper classes and stuff */
 [class*="header"] h2 {
