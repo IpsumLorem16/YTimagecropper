@@ -391,12 +391,15 @@
 
         saveButtonEl.addEventListener('click', handleSaveBtnClick);
 
+        //handle save click event
         function handleSaveBtnClick(e) {
             // show save effect/popup
             addSavedImgThumbnail(previewImage);
             saveImage(previewImage);
             
         }
+
+        
 
         // save image
         function saveImage(image) {
@@ -416,13 +419,24 @@
             imgWraperEl.appendChild(imgEl);
             imgWraperEl.appendChild(controlEl);
 
+            // imgEl.addEventListener('click', handleSavedThumbClick);
+
+            imgEl.addEventListener('click', (e)=>{previewSavedImg(e.target)});
+
+
             savedThumbsEl.prepend(imgWraperEl);
 
         }
 
+        function handleSavedThumbClick(e) {
+            console.log(e.target);
+        }
+
         // Display saved image in preview area.
         function previewSavedImg(image) {
+            console.log('preview image' + image.src)
             isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
+            previewImage.src = image.src;
         }
 
         // Delete saved image, and remove from display.
