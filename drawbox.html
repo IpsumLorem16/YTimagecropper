@@ -102,8 +102,8 @@
 
             <!-- Image controls (for cloning into thumbnails)-->
             <div class="hidden-controls">
-                <div class="img-wrapper__controls" id="savedImageControls">
-                    <button type="button">
+                <div class="img-wrapper__controls">
+                    <button class="delete-btn" type="button">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512">
                             <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
                             <path
@@ -386,20 +386,16 @@
         */
         const saveButtonEl = document.getElementById('saveButton');
         const savedThumbsEl = document.querySelector('.saved-images__thumbnails');
-        const savedControlsEl = document.getElementById('savedImageControls');
+        const savedControlsEl = document.querySelector('.img-wrapper__controls');
         const savedImages =[];
 
         saveButtonEl.addEventListener('click', handleSaveBtnClick);
 
         //handle save click event
         function handleSaveBtnClick(e) {
-            // show save effect/popup
             addSavedImgThumbnail(previewImage);
-            saveImage(previewImage);
-            
+            saveImage(previewImage);        
         }
-
-        
 
         // save image
         function saveImage(image) {
@@ -409,9 +405,10 @@
 
         // add saved image to 'saved images' element.
         function addSavedImgThumbnail(image) {
+            const controlEl = savedControlsEl.cloneNode(true); //clone controls element, hidden on page (to save messy HTML in JS here.)
+            const deleteBtnEl = controlEl.querySelector('.delete-btn');
             const imgWraperEl = document.createElement('span');
             const imgEl = document.createElement('img');
-            const controlEl = savedControlsEl.cloneNode(true);
 
             imgEl.src = image.src;
 
@@ -419,19 +416,37 @@
             imgWraperEl.appendChild(imgEl);
             imgWraperEl.appendChild(controlEl);
 
-            // imgEl.addEventListener('click', handleSavedThumbClick);
+            // Set up event listeners
+            imgEl.addEventListener('click', (e)=>{previewSavedImg(e.target)}); //make image show in preview on click
+            deleteBtnEl.addEventListener('click', handleDeleteBtnClick)
+            console.log(deleteBtnEl)
 
-            imgEl.addEventListener('click', (e)=>{previewSavedImg(e.target)});
-
-
-            savedThumbsEl.prepend(imgWraperEl);
+            savedThumbsEl.prepend(imgWraperEl); //add constructed element to saved-images on page
 
         }
 
-        function handleSavedThumbClick(e) {
-            console.log(e.target);
-        }
+        // handle delete button click event
+        function handleDeleteBtnClick(e){
+            const buttonEl = e.target;
+            const imgWrapperEl = buttonEl.parentNode.parentNode;
+            const imgSrc = imgWrapperEl.querySelector('img').src;
 
+            buttonEl.disabled = true; //stop it being pressed again.
+            buttonEl.remove();
+
+            imgWrapperEl.classList.add('fade-out-shrink'); //animate thumbnail offscreen
+
+            // on animation end, delete it.
+            imgWrapperEl.addEventListener('animationend', ()=>{
+                console.log('animation end')
+                imgWrapperEl.remove();
+                if (previewImage.src === imgSrc) {
+                    console.log('trueee')
+                    captureBoxAsImage();
+                    // URL.revokeObjectURL(imgSrc); //causes bug when in preview
+                }
+            }, {once:true})
+        }
         // Display saved image in preview area.
         function previewSavedImg(image) {
             console.log('preview image' + image.src)
@@ -439,9 +454,10 @@
             previewImage.src = image.src;
         }
 
+
         // Delete saved image, and remove from display.
         function deleteSavedImg(image) {
-
+            //something something, array.filter..
         }
         
 
