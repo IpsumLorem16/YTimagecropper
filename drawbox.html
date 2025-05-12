@@ -280,6 +280,7 @@
                 updateFileSizeText(blob.size); // Display filesize to user       
                 isPreviewImageSaved = false;
 
+                selectThumbnail(); //un-selecte saved images thumbnail, if any. 
             }, "image/jpeg", Number(qualityInput.value / 100));
 
         }
@@ -409,8 +410,10 @@
             const deleteBtnEl = controlEl.querySelector('.delete-btn');
             const imgWraperEl = document.createElement('span');
             const imgEl = document.createElement('img');
+            const fileSizeText = fileSizeTextEl.innerText;
 
             imgEl.src = image.src;
+            imgEl.setAttribute('data-filesize', fileSizeText);
 
             imgWraperEl.className = 'img-wrapper';
             imgWraperEl.appendChild(imgEl);
@@ -443,17 +446,26 @@
                 if (previewImage.src === imgSrc) {
                     console.log('trueee')
                     captureBoxAsImage();
-                    // URL.revokeObjectURL(imgSrc); //causes bug when in preview
                 }
             }, {once:true})
         }
         // Display saved image in preview area.
         function previewSavedImg(image) {
-            console.log('preview image' + image.src)
+            selectThumbnail(image);
+
+            fileSizeTextEl.innerText = image.getAttribute('data-filesize');
             isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
             previewImage.src = image.src;
         }
 
+        // Show what thumbnail is selected, leave image paramater blank to 'unselect'.
+        function selectThumbnail(image){
+            const imgWrapperEl = image?.parentNode;
+            const selectedThumbEl = savedThumbsEl.querySelector('.selected');
+
+            selectedThumbEl?.classList.remove('selected');
+            imgWrapperEl?.classList.add('selected');
+        }
 
         // Delete saved image, and remove from display.
         function deleteSavedImg(image) {

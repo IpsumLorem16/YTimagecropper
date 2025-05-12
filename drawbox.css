@@ -239,11 +239,17 @@ section.saved-images {
     transition: transform 0.1s;
 } */
 
-.saved-images__thumbnails .img-wrapper:hover .img-wrapper__controls button {
+.saved-images__thumbnails .img-wrapper:hover .img-wrapper__controls button,
+.saved-images__thumbnails .img-wrapper.selected .img-wrapper__controls button{
     /* animation */
     visibility: visible;
     opacity: 1;
     transition: opacity 0.11s ease, visibility 0.11s;
+}
+
+.saved-images__thumbnails .img-wrapper.selected {
+    /* border: 2px solid inset #6215dd82; */
+    box-shadow: 1px 1px 4px #464646;
 }
 
 .saved-images__thumbnails .img-wrapper__controls button {
