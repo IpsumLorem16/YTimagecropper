@@ -26,9 +26,9 @@
             <!-- <button type="button" id="saveButton" class="save-button">Crop and save</button> -->
         
             <!-- Cropped Preview Image -->
-            <section class="preview">
+            <section class="preview" id="previewContainer">
                 <div class="preview__header">
-                    <h2>Preview:</h2>
+                    <h2>Preview:<span id="headerText" class="preview-text">Saved Image</span></h2>
                     <!-- set the quality of the cropped image  -->
                     <form id="qualitySlider" class="quality-form">
                         <label for="" qualityInput>Quality: </label>
@@ -123,6 +123,7 @@
         const fileSizeTextEl = document.getElementById('readableSizeText');
         const canvas = document.getElementById('myCanvas');
         const ctx = canvas.getContext('2d');
+        const previewContainerEl = document.getElementById('previewContainer');
         const previewImage = document.getElementById('previewImage');
         let isPreviewImageSaved = false; //prevent current preview image being 'deleted' (blob url revoked) if user has saved it.
         let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault(2).jpg', './videoThumbnails/maxresdefault(3).jpg']; 
@@ -422,7 +423,6 @@
             // Set up event listeners
             imgEl.addEventListener('click', (e)=>{previewSavedImg(e.target)}); //make image show in preview on click
             deleteBtnEl.addEventListener('click', handleDeleteBtnClick)
-            console.log(deleteBtnEl)
 
             savedThumbsEl.prepend(imgWraperEl); //add constructed element to saved-images on page
 
@@ -441,10 +441,8 @@
 
             // on animation end, delete it.
             imgWrapperEl.addEventListener('animationend', ()=>{
-                console.log('animation end')
                 imgWrapperEl.remove();
                 if (previewImage.src === imgSrc) {
-                    console.log('trueee')
                     captureBoxAsImage();
                 }
             }, {once:true})
@@ -454,17 +452,21 @@
             selectThumbnail(image);
 
             fileSizeTextEl.innerText = image.getAttribute('data-filesize');
-            isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
             previewImage.src = image.src;
+            isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
         }
 
         // Show what thumbnail is selected, leave image paramater blank to 'unselect'.
-        function selectThumbnail(image){
+        function selectThumbnail(image  = false){
             const imgWrapperEl = image?.parentNode;
             const selectedThumbEl = savedThumbsEl.querySelector('.selected');
 
             selectedThumbEl?.classList.remove('selected');
             imgWrapperEl?.classList.add('selected');
+
+            // Apply or remove styling to preview section
+            (image == false) ? previewContainerEl.classList.remove('viewing-saved') : previewContainerEl.classList.add('viewing-saved'); 
+            (image == false) ? qualityInput.disabled = false : qualityInput.disabled = true; 
         }
 
         // Delete saved image, and remove from display.

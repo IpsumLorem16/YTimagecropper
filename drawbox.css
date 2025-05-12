@@ -98,6 +98,24 @@ section.preview {
     /* min-width:800px; */
 }
 
+
+section.preview.viewing-saved .preview__header .preview-text {
+    visibility: visible;
+    
+}
+
+.preview__header .preview-text {
+    visibility: hidden;
+    display: inline-block;
+    font-size: 12px;
+    font-weight: normal;
+    padding: 5px;
+    border-radius: 4px;
+    background-color: rgb(240, 52, 247);
+    color: white;
+    margin-left: 4px;
+}
+
 .preview__header {
     display: flex;
     align-items: baseline;
@@ -106,6 +124,7 @@ section.preview {
     margin:5px;
     gap:5px;
 }
+
 
 .preview__header .quality-form input {
     vertical-align: bottom;
@@ -347,5 +366,11 @@ h6 {
 @media only screen and (max-width: 1410px) {
     .group-wrapper {
         flex-wrap: wrap;
+    }
+}
+
+@media only screen and (min-width: 688px) {
+    .quality-form {
+        margin-left: -77px;
     }
 }
