@@ -187,31 +187,53 @@
     let hasFirstImgLoaded = false;
 
     // When each image loaded, conditionally do something (depending on if it was loaded first)
-    imageUrls.map(url => loadImage(url)
-        .then(image => {
-            image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
-        })
-    );
+    // imageUrls.map(url => loadImage(url)
+    //     .then(image => {
+    //         image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
+    //     })
+    // );
 
-    function getVideoThumbnailUrls() {
+
+    async function getVideoThumbnailUrls() {
         let channelId;
         let apiURL; 
         const infoBox = document.querySelector('youtube_import_info-box');
+        let thumbURLs = [];
         
-        channelId = infoBox?.getAttribute('data-channel-id') || getChannelId();
-        apiURL = `${YOUTUBE_API_BASE}search?part=snippet&channelId=${channelId}&order=viewCount&maxResults=5&type=video&key=${secretApiKey}`
-        //get channel id from info-box element data-attribute. (added when using autofill youtube button)
-        // if no channel id, get one using api call and channel name
+        channelId = infoBox?.getAttribute('data-channel-id') || await getChannelId(); //NOTE: move into getchannelid function
+        apiURL = `${YOUTUBE_API_BASE}search?part=snippet&channelId=${channelId}&order=viewCount&maxResults=3&type=video&key=${secretApiKey}`;
         //make api call for popular videos
         //parse response, and update video urls array
-    }
+        try {
+            const response = await fetch(apiURL);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            console.log(data.items[0].id.videoId);
 
+            thumbURLs = data.items.map(element => {
+                const videoId = element.id.videoId;
+                const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+                return thumbnailURL;
+            });
+            console.log(thumbURLs);
+
+            thumbURLs.map(url => loadImage(url)
+                .then(image => {
+                    image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
+                })
+            );
+            
+        } catch (error) {
+            console.error('Fetch error:', error);
+        }
+    }
+    getVideoThumbnailUrls();
     //Get channel ID, calls YoutubeAPI 
     async function getChannelId() {
-        let channelName;
-        let apiURL;
-
-        apiURL = `${YOUTUBE_API_BASE}channels?part=snippet%2CcontentDetails&forHandle=${channelName}&key=${secretApiKey}`
+        const accountName = document.querySelector('input[name="hp_account_name"]').value;
+        let apiURL = `${YOUTUBE_API_BASE}channels?part=snippet%2CcontentDetails&forHandle=${accountName}&key=${secretApiKey}`
     
         try {
             const response = await fetch(apiURL);
@@ -322,6 +344,7 @@
     function handleSaveBtnClick(e) {
         addSavedImgThumbnail(previewImage);
         saveImage(previewImage);
+        console.log(savedImages);
     }
 
     // save image
@@ -399,10 +422,49 @@
         //something something, array.filter..
     }
 
+    /* Upload saved images to wordpress, and save in post */
+    async function uploadSavedImages() {
+        console.log('saved images uploading');
+
+        try {
+            const inputEl = document.querySelector('.hp-field--attachment-upload input[name="hp_images"]');
+            const accountName = document.querySelector('input[name="hp_account_name"]').value;
+
+            const dataTransfer = new DataTransfer(); // single DataTransfer for all files
+
+            // Add all images to DataTransfer
+            for (let index = 0; index < savedImages.length; index++) {
+                const image = savedImages[index];
+                const file = await blobUrlToFile(image, `${accountName}VidThumb_${index}.jpg`);
+                dataTransfer.items.add(file);
+            }
+
+            // Assign all files to the input at once
+            inputEl.files = dataTransfer.files;
+
+            // Dispatch change event AFTER all files are added
+            inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+
+            console.log("All files added to input:", inputEl.files);
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    // temporary add upload on saved images header click
+    const headerEl = document.querySelector('.saved-images__header h2');
+    headerEl.addEventListener('click', uploadSavedImages);
 
     /* 
      *  Helper functions 
      */
+    // Turn blob into actual file
+    async function blobUrlToFile(blobUrl, fileName) {
+        const response = await fetch(blobUrl);
+        const blob = await response.blob();
+        return new File([blob], fileName, { type: blob.type });
+    }
 
     // Debounce for input events
     // We don't want to continously create images on changing some inputs, that could be too rescource intensive
