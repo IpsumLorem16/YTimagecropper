@@ -181,99 +181,92 @@
     }
 
     /* 
-     *  Load Images
+     *  Image Loader
      *  Pre-Loads images from url array, create new image object for each.
-     *  Also populate thumbnails in cropper tool.
+     *  Also populate thumbnails in cropper tool (via method call).
      */
-    let hasFirstImgLoaded = false;
 
-
-    //Fetch video thumbnails urls for youtuber using Youtube API, add to imageURls
-    async function getVideoThumbnailUrls() {
-        let channelId;
-        let apiURL; 
-        const infoBox = document.querySelector('youtube_import_info-box');
+    const ImageLoader = { 
+        imageUrls: ['https://i.ytimg.com/vi/0GCuvcTI090/maxresdefault.jpg', 'https://i.ytimg.com/vi/-tBy2jemw4s/maxresdefault.jpg', 'https://i.ytimg.com/vi/nfpWAqK0YZE/maxresdefault.jpg'],
+        hasFirstImgLoaded: false,
         
-        channelId = infoBox?.getAttribute('data-channel-id') || await getChannelId(); 
-        apiURL = `${YOUTUBE_API_BASE}search?part=snippet&channelId=${channelId}&order=viewCount&maxResults=3&type=video&key=${secretApiKey}`;
-        //make api call for popular videos
-        //parse response, and update video urls array
-        try {
-            const response = await fetch(apiURL);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+        getVideoThumbnailUrls: async function () { //Fetch video thumbnails urls for youtuber using Youtube API, add to imageURls.
+            const channelId = await this.getChannelId();
+            let apiURL = `${YOUTUBE_API_BASE}search?part=snippet&channelId=${channelId}&order=viewCount&maxResults=3&type=video&key=${secretApiKey}`;
+            
+            try {
+                const response = await fetch(apiURL); //make api call for popular videos
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                //parse response, and update video urls array
+                const data = await response.json();
+                this.imageUrls = data.items.map(element => {
+                    const videoId = element.id.videoId;
+                    const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+                    return thumbnailURL;
+                });
+            } catch (error) {
+                console.error('Fetch error:', error);
             }
-            const data = await response.json();
-            console.log(data.items[0].id.videoId);
-
-            imageUrls = data.items.map(element => {
-                const videoId = element.id.videoId;
-                const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-                return thumbnailURL;
+        },
+        loadVideoThumbnails: function() { //load video thumbnails from urls and add to cropper tool. 
+            this.imageUrls.map(url => this.loadImage(url)
+                .then(image => {
+                    image.isFirst ? this.handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
+                })
+            );
+        },
+        loadImage: function(url) { //Preload single Image and add to images array.
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = url;
+                img.onload = () => {
+                    images.push(img);
+                    const isFirst = this.hasFirstImgLoaded ? false : true;
+                    if (isFirst) this.hasFirstImgLoaded = true; // set boolean var, if this was the first image loaded
+                    resolve({ url, image: img, isFirst })
+                };
+                img.onerror = reject;
             });
-        } catch (error) {
-            console.error('Fetch error:', error);
-        }
-    }
+        },
+        handleFirstImageLoaded: function(image) {
+            selectImage(image,);
+            addCropperThumbnail(image.url)
+                .classList.add('selected');
+        },
+        getChannelId: async function(){ //Returns string, uses Youtube API if id not on page.
+            const infoBox = document.querySelector('youtube_import_info-box');
+            let channelId = infoBox?.getAttribute('data-channel-id');
 
-    //Load video thumbnails into app
-    function loadVideoThumbnails() {
-        imageUrls.map(url => loadImage(url)
-            .then(image => {
-                image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
-            })
-        );
-    }
+            if (channelId?.length > 0) {
+                return channelId;
+            } 
 
-    //run when ready to start app. 
-    async function initialiseApp() {
-        // Load up video thumbnails. 
-        if (isProd) await getVideoThumbnailUrls();
-        loadVideoThumbnails();
-    }
+            const accountName = document.querySelector('input[name="hp_account_name"]').value;
+            let apiURL = `${YOUTUBE_API_BASE}channels?part=snippet%2CcontentDetails&forHandle=${accountName}&key=${secretApiKey}`
 
-    initialiseApp();
-
-    //Get channel ID, calls YoutubeAPI 
-    async function getChannelId() {
-        const accountName = document.querySelector('input[name="hp_account_name"]').value;
-        let apiURL = `${YOUTUBE_API_BASE}channels?part=snippet%2CcontentDetails&forHandle=${accountName}&key=${secretApiKey}`
-    
-        try {
-            const response = await fetch(apiURL);
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
+            try {
+                const response = await fetch(apiURL);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const data = await response.json();
+                return data.items[0].id;
+            } catch (error) {
+                console.error('Fetch error:', error);
             }
-            const data = await response.json();
-            console.log(data);
-            return data.items[0].id;
-        } catch (error) {
-            console.error('Fetch error:', error);
+        },
+        
+        init: async function() {
+            // Load up video thumbnails. 
+            if (isProd) await this.getVideoThumbnailUrls();
+            this.loadVideoThumbnails();
         }
     }
 
-    // Preload supplied image, and push to array.
-    function loadImage(url) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.src = url;
-            img.onload = () => {
-                images.push(img);
-                const isFirst = hasFirstImgLoaded ? false : true;
-                if (isFirst) hasFirstImgLoaded = true; // set boolean var, if this was the first image loaded
-                resolve({ url, image: img, isFirst })
-            };
-            img.onerror = reject;
-        })
-    }
-
-    // Handle the first loaded image
-    function handleFirstImageLoaded(image) {
-        selectImage(image,);
-        addCropperThumbnail(image.url)
-            .classList.add('selected');
-    }
+    ImageLoader.init();
 
     // Add thumbnail (from pre-loaded image) in cropper.
     function addCropperThumbnail(imageUrl) {
