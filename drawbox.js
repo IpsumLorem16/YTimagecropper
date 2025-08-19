@@ -11,7 +11,6 @@
     const previewImage = document.getElementById('previewImage');
     let isPreviewImageSaved = false; //prevent current preview image being 'deleted' (blob url revoked) if user has saved it.
     // let imageUrls = ['./videoThumbnails/maxresdefault(1).jpg', './videoThumbnails/maxresdefault(2).jpg', './videoThumbnails/maxresdefault(3).jpg'];
-    let imageUrls = ['https://i.ytimg.com/vi/0GCuvcTI090/maxresdefault.jpg', 'https://i.ytimg.com/vi/-tBy2jemw4s/maxresdefault.jpg', 'https://i.ytimg.com/vi/nfpWAqK0YZE/maxresdefault.jpg'];
     
     
     let images = [];
@@ -161,15 +160,15 @@
         tempCanvas.toBlob((blob) => {
             const imageURL = URL.createObjectURL(blob);
 
-            if (!isPreviewImageSaved) {
+            if (!SavedImagesPanel.isPreviewImageSaved) {
                 URL.revokeObjectURL(previewImage.src);
             }
             previewImage.src = imageURL;
 
             updateFileSizeText(blob.size); // Display filesize to user       
-            isPreviewImageSaved = false;
+            SavedImagesPanel.isPreviewImageSaved = false;
 
-            selectThumbnail(); //un-selecte saved images thumbnail, if any. 
+            SavedImagesPanel.selectThumbnail(); //un-selecte saved images thumbnail, if any. 
         }, "image/jpeg", Number(qualityInput.value / 100));
 
     }
@@ -258,13 +257,12 @@
                 console.error('Fetch error:', error);
             }
         },
-        
         init: async function() {
             // Load up video thumbnails. 
             if (isProd) await this.getVideoThumbnailUrls();
             this.loadVideoThumbnails();
         }
-    }
+    };
 
     ImageLoader.init();
 
@@ -326,94 +324,95 @@
      *  Save Image
      *  Saves the cropped image from the preview window, and diplays in saved images.
      */
-    const saveButtonEl = document.getElementById('saveButton');
-    const savedThumbsEl = document.querySelector('.saved-images__thumbnails');
-    const savedControlsEl = document.querySelector('.img-wrapper__controls');
-    const savedImages = [];
+    const SavedImagesPanel = {
+        elements: {
+            saveButtonEl: document.getElementById('saveButton'),
+            savedThumbsEl: document.querySelector('.saved-images__thumbnails'),
+            savedControlsEl: document.querySelector('.img-wrapper__controls'),
+        },
+        //State
+        images: [],
+        isPreviewImageSaved: false,
 
-    saveButtonEl.addEventListener('click', handleSaveBtnClick);
+        //Event listener handlers
+        handleSaveBtnClick(e) {
+            this.addSavedImgThumbnail(previewImage);
+            this.saveImage(previewImage);
+            console.log(this.images);
+        },
+        handleDeleteBtnClick(e) {
+            const buttonEl = e.target;
+            const imgWrapperEl = buttonEl.parentNode.parentNode;
+            const imgSrc = imgWrapperEl.querySelector('img').src;
 
-    //handle save click event
-    function handleSaveBtnClick(e) {
-        addSavedImgThumbnail(previewImage);
-        saveImage(previewImage);
-        console.log(savedImages);
+            buttonEl.disabled = true; //stop it being pressed again.
+            buttonEl.remove();
+
+            imgWrapperEl.classList.add('fade-out-shrink'); //animate thumbnail offscreen
+
+            // on animation end, delete it.
+            imgWrapperEl.addEventListener('animationend', () => {
+                imgWrapperEl.remove();
+                this.deleteSavedImg(imgSrc);
+                if (previewImage.src === imgSrc) {
+                    captureBoxAsImage();
+                }
+            }, { once: true })
+        },
+
+        //Functions
+        saveImage(image) {
+            this.isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
+            this.images.push(image.src);
+        },
+        deleteSavedImg(imageUrl) {
+            this.images = this.images.filter(item => item !== imageUrl); //remove the matching image form array.
+            // URL.revokeObjectURL(imageUrl);//bug, if user clicks save twice on same image in preview, duplicate bloblurl is added to images panel. if one is then deleted, the other is now not viewable.
+        },
+        addSavedImgThumbnail(image) {
+            const controlEl = this.elements.savedControlsEl.cloneNode(true); //clone controls element, hidden on page (to save messy HTML in JS here.)
+            const deleteBtnEl = controlEl.querySelector('.delete-btn');
+            const imgWraperEl = document.createElement('span');
+            const imgEl = document.createElement('img');
+            const fileSizeText = fileSizeTextEl.innerText;
+
+            imgEl.src = image.src;
+            imgEl.setAttribute('data-filesize', fileSizeText);
+
+            imgWraperEl.className = 'img-wrapper';
+            imgWraperEl.appendChild(imgEl);
+            imgWraperEl.appendChild(controlEl);
+
+            // Set up event listeners
+            imgEl.addEventListener('click', (e) => { this.previewSavedImg(e.target) }); //make image show in preview on click
+            deleteBtnEl.addEventListener('click', this.handleDeleteBtnClick.bind(this))
+
+            this.elements.savedThumbsEl.prepend(imgWraperEl); //add constructed element to saved-images on page
+
+        },
+        previewSavedImg(image) {
+            this.selectThumbnail(image);
+            fileSizeTextEl.innerText = image.getAttribute('data-filesize');
+            previewImage.src = image.src;
+            this.isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
+        },
+        selectThumbnail(image = false) {
+            const imgWrapperEl = image?.parentNode;
+            const selectedThumbEl = this.elements.savedThumbsEl.querySelector('.selected');
+
+            selectedThumbEl?.classList.remove('selected');
+            imgWrapperEl?.classList.add('selected');
+
+            // Apply or remove styling to preview section
+            (image == false) ? previewContainerEl.classList.remove('viewing-saved') : previewContainerEl.classList.add('viewing-saved');
+            (image == false) ? qualityInput.disabled = false : qualityInput.disabled = true;
+        },
+        init() {
+            this.elements.saveButtonEl.addEventListener('click', this.handleSaveBtnClick.bind(this));
+        }
     }
 
-    // save image
-    function saveImage(image) {
-        isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
-        savedImages.push(image.src);
-    }
-
-    // add saved image to 'saved images' element.
-    function addSavedImgThumbnail(image) {
-        const controlEl = savedControlsEl.cloneNode(true); //clone controls element, hidden on page (to save messy HTML in JS here.)
-        const deleteBtnEl = controlEl.querySelector('.delete-btn');
-        const imgWraperEl = document.createElement('span');
-        const imgEl = document.createElement('img');
-        const fileSizeText = fileSizeTextEl.innerText;
-
-        imgEl.src = image.src;
-        imgEl.setAttribute('data-filesize', fileSizeText);
-
-        imgWraperEl.className = 'img-wrapper';
-        imgWraperEl.appendChild(imgEl);
-        imgWraperEl.appendChild(controlEl);
-
-        // Set up event listeners
-        imgEl.addEventListener('click', (e) => { previewSavedImg(e.target) }); //make image show in preview on click
-        deleteBtnEl.addEventListener('click', handleDeleteBtnClick)
-
-        savedThumbsEl.prepend(imgWraperEl); //add constructed element to saved-images on page
-
-    }
-
-    // handle delete button click event
-    function handleDeleteBtnClick(e) {
-        const buttonEl = e.target;
-        const imgWrapperEl = buttonEl.parentNode.parentNode;
-        const imgSrc = imgWrapperEl.querySelector('img').src;
-
-        buttonEl.disabled = true; //stop it being pressed again.
-        buttonEl.remove();
-
-        imgWrapperEl.classList.add('fade-out-shrink'); //animate thumbnail offscreen
-
-        // on animation end, delete it.
-        imgWrapperEl.addEventListener('animationend', () => {
-            imgWrapperEl.remove();
-            if (previewImage.src === imgSrc) {
-                captureBoxAsImage();
-            }
-        }, { once: true })
-    }
-    // Display saved image in preview area.
-    function previewSavedImg(image) {
-        selectThumbnail(image);
-
-        fileSizeTextEl.innerText = image.getAttribute('data-filesize');
-        previewImage.src = image.src;
-        isPreviewImageSaved = true; // set flag, current displayed image is saved, and not to revoke blob-url.
-    }
-
-    // Show what thumbnail is selected, leave image paramater blank to 'unselect'.
-    function selectThumbnail(image = false) {
-        const imgWrapperEl = image?.parentNode;
-        const selectedThumbEl = savedThumbsEl.querySelector('.selected');
-
-        selectedThumbEl?.classList.remove('selected');
-        imgWrapperEl?.classList.add('selected');
-
-        // Apply or remove styling to preview section
-        (image == false) ? previewContainerEl.classList.remove('viewing-saved') : previewContainerEl.classList.add('viewing-saved');
-        (image == false) ? qualityInput.disabled = false : qualityInput.disabled = true;
-    }
-
-    // Delete saved image, and remove from display.
-    function deleteSavedImg(image) {
-        //something something, array.filter..
-    }
+    SavedImagesPanel.init();
 
     /* Upload saved images to wordpress, and save in post */
     async function uploadSavedImages() {
@@ -426,8 +425,8 @@
             const dataTransfer = new DataTransfer(); // single DataTransfer for all files
 
             // Add all images to DataTransfer
-            for (let index = 0; index < savedImages.length; index++) {
-                const image = savedImages[index];
+            for (let index = 0; index < SavedImagesPanel.images.length; index++) {
+                const image = SavedImagesPanel.images[index];
                 const file = await blobUrlToFile(image, `${accountName}VidThumb_${index}.jpg`);
                 dataTransfer.items.add(file);
             }
