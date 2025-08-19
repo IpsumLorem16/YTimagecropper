@@ -1,4 +1,5 @@
 (async function () {
+    const isProd = document.body.classList.contains('wp-admin');
     const myApiData = window.myApiData || {};
     const secretApiKey = myApiData.youtubeApiKey || (await import('./config.local.js')).youtubeApiKey;
     const YOUTUBE_API_BASE = 'https://youtube.googleapis.com/youtube/v3/';
@@ -186,21 +187,14 @@
      */
     let hasFirstImgLoaded = false;
 
-    // When each image loaded, conditionally do something (depending on if it was loaded first)
-    // imageUrls.map(url => loadImage(url)
-    //     .then(image => {
-    //         image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
-    //     })
-    // );
 
-
+    //Fetch video thumbnails urls for youtuber using Youtube API, add to imageURls
     async function getVideoThumbnailUrls() {
         let channelId;
         let apiURL; 
         const infoBox = document.querySelector('youtube_import_info-box');
-        let thumbURLs = [];
         
-        channelId = infoBox?.getAttribute('data-channel-id') || await getChannelId(); //NOTE: move into getchannelid function
+        channelId = infoBox?.getAttribute('data-channel-id') || await getChannelId(); 
         apiURL = `${YOUTUBE_API_BASE}search?part=snippet&channelId=${channelId}&order=viewCount&maxResults=3&type=video&key=${secretApiKey}`;
         //make api call for popular videos
         //parse response, and update video urls array
@@ -212,24 +206,34 @@
             const data = await response.json();
             console.log(data.items[0].id.videoId);
 
-            thumbURLs = data.items.map(element => {
+            imageUrls = data.items.map(element => {
                 const videoId = element.id.videoId;
                 const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
                 return thumbnailURL;
             });
-            console.log(thumbURLs);
-
-            thumbURLs.map(url => loadImage(url)
-                .then(image => {
-                    image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
-                })
-            );
-            
         } catch (error) {
             console.error('Fetch error:', error);
         }
     }
-    getVideoThumbnailUrls();
+
+    //Load video thumbnails into app
+    function loadVideoThumbnails() {
+        imageUrls.map(url => loadImage(url)
+            .then(image => {
+                image.isFirst ? handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
+            })
+        );
+    }
+
+    //run when ready to start app. 
+    async function initialiseApp() {
+        // Load up video thumbnails. 
+        if (isProd) await getVideoThumbnailUrls();
+        loadVideoThumbnails();
+    }
+
+    initialiseApp();
+
     //Get channel ID, calls YoutubeAPI 
     async function getChannelId() {
         const accountName = document.querySelector('input[name="hp_account_name"]').value;
@@ -246,10 +250,6 @@
         } catch (error) {
             console.error('Fetch error:', error);
         }
-    }
-
-    function isProd(){
-        //checks if is deployed or is not. 
     }
 
     // Preload supplied image, and push to array.
