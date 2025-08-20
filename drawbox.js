@@ -409,7 +409,33 @@
         },
         init() {
             this.elements.saveButtonEl.addEventListener('click', this.handleSaveBtnClick.bind(this));
-        }
+            //check if isProd then:
+            this.UploadButton.init();
+        },
+        UploadButton: {
+            buttonEl: document.querySelector('.saved-images__upload-btn'),
+            enable() {
+                this.buttonEl.disabled = false;
+                this.setLoading(false);
+            },
+            disable() {
+                this.buttonEl.disabled = true;
+            },
+            setLoading(isLoading){
+                this.buttonEl.classList.toggle('loading', isLoading);
+            },
+            handleClick() {
+                this.disable();
+                this.setLoading(true);
+                //for testing only
+                setTimeout(()=>{
+                    SavedImagesPanel.UploadButton.enable();
+                }, 1000)
+            },
+            init() {
+                this.buttonEl.addEventListener('click', this.handleClick.bind(this));
+            }
+        },
     }
 
     SavedImagesPanel.init();
@@ -427,7 +453,8 @@
             // Add all images to DataTransfer
             for (let index = 0; index < SavedImagesPanel.images.length; index++) {
                 const image = SavedImagesPanel.images[index];
-                const file = await blobUrlToFile(image, `${accountName}VidThumb_${index}.jpg`);
+                const id = crypto.randomUUID();
+                const file = await blobUrlToFile(image, `${accountName}VidThumb_${id}.jpg`);
                 dataTransfer.items.add(file);
             }
 
@@ -445,8 +472,8 @@
     }
 
     // temporary add upload on saved images header click
-    const headerEl = document.querySelector('.saved-images__header h2');
-    headerEl.addEventListener('click', uploadSavedImages);
+    // const headerEl = document.querySelector('.saved-images__header h2');
+    // headerEl.addEventListener('click', uploadSavedImages);
 
     /* 
      *  Helper functions 
