@@ -9,6 +9,7 @@
         init() {
             this.getAppHTML();
             this.deleteCropperBtns();
+            this.removeAppHTML();
             this.addOpenCropperBtn();
         },
 

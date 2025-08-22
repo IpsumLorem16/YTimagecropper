@@ -413,6 +413,7 @@
         },
         UploadButton: {
             buttonEl: document.querySelector('.saved-images__upload-btn'),
+            // inputEl: document.querySelector('.hp-field--attachment-upload input[name="hp_images"]'),
             enable() {
                 this.buttonEl.disabled = false;
                 this.setLoading(false);
@@ -427,7 +428,8 @@
                 this.disable();
                 this.setLoading(true);
                 // Simulate uploading if not in production.
-                (isProd) ? this.uploadSavedImages : setTimeout(() => {SavedImagesPanel.UploadButton.enable()}, 1000);
+                console.log(isProd);
+                (isProd) ? this.uploadSavedImages() : setTimeout(() => {SavedImagesPanel.UploadButton.enable()}, 1000);
             },
             async uploadSavedImages() {
                 console.log('saved images uploading');
@@ -457,6 +459,16 @@
             },
             init() {
                 this.buttonEl.addEventListener('click', this.handleClick.bind(this));
+                if (isProd){
+                    const wpUploadBtnEl = document.querySelector('.hp-field--attachment-upload button');
+                    // Observe changes on file input
+                    new MutationObserver(() => {
+                        if (wpUploadBtnEl.getAttribute("data-state") !== "loading") {
+                            this.enable();
+                        }
+                    }).observe(wpUploadBtnEl, { attributes: true, attributeFilter: ["data-state"] });
+
+                }
             }
         },
     }
