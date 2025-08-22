@@ -409,7 +409,6 @@
         },
         init() {
             this.elements.saveButtonEl.addEventListener('click', this.handleSaveBtnClick.bind(this));
-            //check if isProd then:
             this.UploadButton.init();
         },
         UploadButton: {
@@ -427,10 +426,34 @@
             handleClick() {
                 this.disable();
                 this.setLoading(true);
-                //for testing only
-                setTimeout(()=>{
-                    SavedImagesPanel.UploadButton.enable();
-                }, 1000)
+                // Simulate uploading if not in production.
+                (isProd) ? this.uploadSavedImages : setTimeout(() => {SavedImagesPanel.UploadButton.enable()}, 1000);
+            },
+            async uploadSavedImages() {
+                console.log('saved images uploading');
+
+                try {
+                    const inputEl = document.querySelector('.hp-field--attachment-upload input[name="hp_images"]');
+                    const accountName = document.querySelector('input[name="hp_account_name"]').value;
+
+                    const dataTransfer = new DataTransfer(); // single DataTransfer for all files
+
+                    // Add all images to DataTransfer
+                    for (let index = 0; index < SavedImagesPanel.images.length; index++) {
+                        const image = SavedImagesPanel.images[index];
+                        const id = crypto.randomUUID();
+                        const file = await blobUrlToFile(image, `${accountName}VidThumb_${id}.jpg`);
+                        dataTransfer.items.add(file);
+                    }
+
+                    // Assign all files to the input at once
+                    inputEl.files = dataTransfer.files;
+                    // Dispatch change event AFTER all files are added
+                    inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+                    console.log("All files added to input:", inputEl.files);
+                } catch (error) {
+                    console.log(error);
+                };
             },
             init() {
                 this.buttonEl.addEventListener('click', this.handleClick.bind(this));
@@ -441,35 +464,35 @@
     SavedImagesPanel.init();
 
     /* Upload saved images to wordpress, and save in post */
-    async function uploadSavedImages() {
-        console.log('saved images uploading');
+    // async function uploadSavedImages() {
+    //     console.log('saved images uploading');
 
-        try {
-            const inputEl = document.querySelector('.hp-field--attachment-upload input[name="hp_images"]');
-            const accountName = document.querySelector('input[name="hp_account_name"]').value;
+    //     try {
+    //         const inputEl = document.querySelector('.hp-field--attachment-upload input[name="hp_images"]');
+    //         const accountName = document.querySelector('input[name="hp_account_name"]').value;
 
-            const dataTransfer = new DataTransfer(); // single DataTransfer for all files
+    //         const dataTransfer = new DataTransfer(); // single DataTransfer for all files
 
-            // Add all images to DataTransfer
-            for (let index = 0; index < SavedImagesPanel.images.length; index++) {
-                const image = SavedImagesPanel.images[index];
-                const id = crypto.randomUUID();
-                const file = await blobUrlToFile(image, `${accountName}VidThumb_${id}.jpg`);
-                dataTransfer.items.add(file);
-            }
+    //         // Add all images to DataTransfer
+    //         for (let index = 0; index < SavedImagesPanel.images.length; index++) {
+    //             const image = SavedImagesPanel.images[index];
+    //             const id = crypto.randomUUID();
+    //             const file = await blobUrlToFile(image, `${accountName}VidThumb_${id}.jpg`);
+    //             dataTransfer.items.add(file);
+    //         }
 
-            // Assign all files to the input at once
-            inputEl.files = dataTransfer.files;
+    //         // Assign all files to the input at once
+    //         inputEl.files = dataTransfer.files;
 
-            // Dispatch change event AFTER all files are added
-            inputEl.dispatchEvent(new Event("change", { bubbles: true }));
+    //         // Dispatch change event AFTER all files are added
+    //         inputEl.dispatchEvent(new Event("change", { bubbles: true }));
 
-            console.log("All files added to input:", inputEl.files);
+    //         console.log("All files added to input:", inputEl.files);
 
-        } catch (error) {
-            console.log(error);
-        }
-    }
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // }
 
     // temporary add upload on saved images header click
     // const headerEl = document.querySelector('.saved-images__header h2');

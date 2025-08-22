@@ -286,8 +286,8 @@ section.saved-images {
 }
 .saved-images__upload-btn__icons {
     margin-left:5px;
-    width:25px;
-    height:25px;
+    width:23px;
+    height:23px;
 }
 
 .saved-images__upload-btn__icons svg {
@@ -300,6 +300,7 @@ section.saved-images {
 }
 .saved-images__upload-btn__icon--upload {
     fill:white;
+    animation: fade-out forwards reverse 0.18s;
 }
 
 
@@ -398,6 +399,10 @@ h6 {
 
 .fade-out-shrink {
     animation: fade-out 0.5s forwards, shrink 0.25s  0.25s forwards;
+}
+
+.fade-in {
+    animation: fade-out forwards reverse .18s;
 }
 
 /* keyframes */
