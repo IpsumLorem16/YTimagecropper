@@ -34,12 +34,21 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
     pointer-events: none;
 }
 
+.cropper-tool__header h2{
+    padding-left: 6px;
+    padding-bottom: 6px;
+}
+
 .cropper-tool__thumbnails {
     padding: 12px;
     display: flex;
-    justify-content: space-evenly;
+    max-width:800px;
+    gap: 20px;
+    /* justify-content: space-evenly; */
     margin-bottom:6px;
     user-select: none;
+    overflow-x: auto;
+    scrollbar-width: thin;
 }
 
 .cropper-tool__thumbnails img {
@@ -52,6 +61,7 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
     width: 150px;
     cursor: pointer;
     filter: brightness(0.6);
+    flex-shrink: 0;
 }
 
 .cropper-tool__thumbnails span.selected {
@@ -380,6 +390,9 @@ section.saved-images {
 /* helper classes and stuff */
 [class*="header"] h2 {
     font-size: 20px;
+    font-size: 14px;
+    padding-left:10px;
+    line-height:2.4;
     color: #2e2b2b;
 }
 
