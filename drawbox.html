@@ -13,8 +13,12 @@
         <div class="group-wrapper">
             <!-- Where full image is displayed, with interactive cropping -->
             <section id="cropperTool" class="cropper-tool">
-                <div class="cropperTool__header">
+                <div class="cropper-tool__header">
                     <h2>Cropper Tool</h2>
+                    <form div class="cropper-tool__form">
+                        <input type="text" name="video-url" placeholder="Enter Video URL" required>
+                        <button type="submit">Submit</button>
+                    </form>
                 </div>
                 <div id="thumbnailSelection" class="cropper-tool__thumbnails" data-thumbnails="3">
                     <!-- thumbnails -->

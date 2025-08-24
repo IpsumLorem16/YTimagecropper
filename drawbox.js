@@ -211,12 +211,29 @@
                 console.error('Fetch error:', error);
             }
         },
-        loadVideoThumbnails: function() { //load video thumbnails from urls and add to cropper tool. 
-            this.imageUrls.map(url => this.loadImage(url)
-                .then(image => {
-                    image.isFirst ? this.handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
-                })
-            );
+        updateVideoThumbnails: function(newVideoUrl) { 
+            // Update cropper with video thumbnails.
+            // If newVideoUrl is provided, only add that thumbnail (used after init()).
+            // Otherwise, load all thumbnails from this.imageUrls.
+            if (newVideoUrl){
+                const croppperThumbsEl = document.querySelector('.cropper-tool__thumbnails');          
+                
+                selectImage(newVideoUrl, addCropperThumbnail(newVideoUrl));
+
+                requestAnimationFrame(() => {
+                    croppperThumbsEl.scrollTo({
+                        left: croppperThumbsEl.scrollWidth,
+                        behavior: 'smooth'
+                    });
+                });
+
+            } else {
+                this.imageUrls.map(url => this.loadImage(url)
+                    .then(image => {
+                        image.isFirst ? this.handleFirstImageLoaded(image) : addCropperThumbnail(image.url);
+                    })
+                );
+            }
         },
         loadImage: function(url) { //Preload single Image and add to images array.
             return new Promise((resolve, reject) => {
@@ -262,11 +279,49 @@
         init: async function() {
             // Load up video thumbnails. 
             if (isProd) await this.getVideoThumbnailUrls();
-            this.loadVideoThumbnails();
+            this.updateVideoThumbnails();
         }
     };
 
     ImageLoader.init();
+
+    /* Cropper Tool: Handles the video URL submission form,
+       adding thumbnails dynamically and managing the thumbnail scroll */
+    const UrlForm = {
+        formEl: document.querySelector('.cropper-tool__form'),
+        inputEl: document.querySelector('.cropper-tool__form')["video-url"],
+
+        handleSubmit(e){
+            e.preventDefault();
+            
+            const videoId = extractYouTubeVideoId(this.inputEl.value);
+
+            if (!videoId) {
+                this.inputEl.setCustomValidity("Please enter a valid YouTube URL containing a video ID.");
+                this.inputEl.reportValidity();
+            } else {
+                this.inputEl.setCustomValidity(""); // clear any previous error
+                console.log("Valid YouTube URL, video ID:", videoId);
+                const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
+                console.log(thumbnailURL);
+
+                ImageLoader.updateVideoThumbnails(thumbnailURL);
+                this.clear();
+            }
+        },
+        clear() {
+            this.inputEl.value = '';
+        },
+        init() {
+            this.formEl.addEventListener('submit', this.handleSubmit.bind(this));
+
+            this.inputEl.addEventListener("input", () => {
+                this.inputEl.setCustomValidity(""); // reset
+            });
+        }
+    }
+    UrlForm.init();
+   
 
     // Add thumbnail (from pre-loaded image) in cropper.
     function addCropperThumbnail(imageUrl) {
@@ -281,7 +336,7 @@
         return thumbEl.parentNode;
     }
 
-    // Create new thumbnail element
+    // Create new thumbnail element in cropper
     function createCropperThumbnail() {
         const croppperThumbsEl = document.querySelector('.cropper-tool__thumbnails');
         const currNumOfThumbs = croppperThumbsEl.getAttribute('data-thumbnails');
@@ -510,6 +565,43 @@
             timeoutId = setTimeout(() => callback.apply(this, args), delay);
         };
     }
+
+    /**
+    * Extracts the YouTube video ID from a user-entered URL.
+    * @param {string} input - The user-entered URL.
+    * @returns {string|null} - Video ID if valid, otherwise null.
+    */
+    function extractYouTubeVideoId(input) {
+        console.log(input);
+        if (!input) return null;
+
+        let urlValue = input.trim();
+
+        // Add protocol if missing
+        if (!/^https?:\/\//i.test(urlValue)) {
+            urlValue = "https://" + urlValue;
+        }
+
+        try {
+            const parsedUrl = new URL(urlValue);
+            const hostname = parsedUrl.hostname.replace(/^www\./, "").toLowerCase();
+            let videoId = "";
+
+            if (hostname === "youtube.com") {
+                videoId = parsedUrl.searchParams.get("v") || "";
+                if (!videoId) return null;
+            } else if (hostname === "youtu.be") {
+                videoId = parsedUrl.pathname.split("/")[1] || "";
+                if (!videoId) return null;
+            } else {
+                return null;
+            }
+
+            return videoId;
+        } catch {
+            return null; // Invalid URL format
+        }
+    }   
 
 
     /**

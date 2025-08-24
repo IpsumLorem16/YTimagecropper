@@ -34,9 +34,19 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
     pointer-events: none;
 }
 
+.cropper-tool__header {
+    display: flex;
+    align-items: center;
+}
+
+.cropper-tool__form {
+    margin-left:auto;
+}
+
 .cropper-tool__header h2{
     padding-left: 6px;
     padding-bottom: 6px;
+    margin-right: 5px;
 }
 
 .cropper-tool__thumbnails {
