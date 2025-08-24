@@ -58,6 +58,7 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
 .cropper-tool__thumbnails span {
     overflow: hidden;
     width: 150px;
+    min-width:90px;
     cursor: pointer;
     filter: brightness(0.6);
 }

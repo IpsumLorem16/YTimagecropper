@@ -275,7 +275,7 @@
 
         thumbEl.addEventListener('click', (e) => {
             const target = e.target;
-            selectImage(target.src, target.parentNode)
+            selectImage(target.src, target.parentNode);
         })
         return thumbEl.parentNode;
     }
