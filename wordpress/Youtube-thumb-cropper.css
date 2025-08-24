@@ -40,7 +40,6 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
 .cropper-tool__thumbnails {
     padding: 12px;
     display: flex;
-    /* justify-content: space-evenly; */
     max-width: 800px;
     gap: 20px;
     overflow-x: auto;

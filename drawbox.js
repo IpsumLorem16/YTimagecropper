@@ -186,7 +186,8 @@
      */
 
     const ImageLoader = { 
-        imageUrls: ['https://i.ytimg.com/vi/0GCuvcTI090/maxresdefault.jpg', 'https://i.ytimg.com/vi/-tBy2jemw4s/maxresdefault.jpg', 'https://i.ytimg.com/vi/nfpWAqK0YZE/maxresdefault.jpg', 'https://i.ytimg.com/vi/icwENiwT1zI/maxresdefault.jpg', 'https://i.ytimg.com/vi/aVT0BvWZcLg/maxresdefault.jpg'],
+        // imageUrls: ['https://i.ytimg.com/vi/0GCuvcTI090/maxresdefault.jpg', 'https://i.ytimg.com/vi/-tBy2jemw4s/maxresdefault.jpg', 'https://i.ytimg.com/vi/nfpWAqK0YZE/maxresdefault.jpg', 'https://i.ytimg.com/vi/icwENiwT1zI/maxresdefault.jpg', 'https://i.ytimg.com/vi/aVT0BvWZcLg/maxresdefault.jpg'],
+        imageUrls: ['https://i.ytimg.com/vi/nfpWAqK0YZE/maxresdefault.jpg', 'https://i.ytimg.com/vi/icwENiwT1zI/maxresdefault.jpg', 'https://i.ytimg.com/vi/aVT0BvWZcLg/maxresdefault.jpg'],
         hasFirstImgLoaded: false,
         
         getVideoThumbnailUrls: async function () { //Fetch video thumbnails urls for youtuber using Youtube API, add to imageURls.
@@ -283,12 +284,14 @@
     // Create new thumbnail element
     function createCropperThumbnail() {
         const croppperThumbsEl = document.querySelector('.cropper-tool__thumbnails');
+        const currNumOfThumbs = croppperThumbsEl.getAttribute('data-thumbnails');
         const spanEl = document.createElement('span');
         const thumbEl = document.createElement('img');
         thumbEl.classList.add('hidden');
 
         spanEl.appendChild(thumbEl);
         croppperThumbsEl.appendChild(spanEl);
+        croppperThumbsEl.setAttribute('data-thumbnails', (Number(currNumOfThumbs) +1));
 
         return thumbEl;
     }

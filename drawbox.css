@@ -44,11 +44,14 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
     display: flex;
     max-width:800px;
     gap: 20px;
-    /* justify-content: space-evenly; */
     margin-bottom:6px;
     user-select: none;
     overflow-x: auto;
     scrollbar-width: thin;
+}
+
+.cropper-tool__thumbnails[data-thumbnails="3"] {
+    justify-content: space-around;
 }
 
 .cropper-tool__thumbnails img {
