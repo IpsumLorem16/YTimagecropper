@@ -17,14 +17,21 @@
             const buttonEl = document.createElement('button');
             buttonEl.classList.add('yt-cropper-loader-btn');
             buttonEl.setAttribute('type', 'button');
-            buttonEl.innerText = 'open image scraper & cropper tool';
+            buttonEl.innerText = 'Open Thumbnail Cropper Tool';
             this.imagesContainerEl.appendChild(buttonEl);
 
-            buttonEl.addEventListener('click', () => {
-                this.addAppHTML();
+            // Doing it this weird way, so we can remove the even listener from other script.
+
+            // Store the handler on the element itself for easy removal
+            buttonEl._cropperClickHandler = () => {
+                CropperLoader.addAppHTML();
                 import('http://127.0.0.1:5500/drawbox.js');
-            });
+            };
+
+            buttonEl.addEventListener('click', buttonEl._cropperClickHandler);
         },
+
+        
 
         deleteCropperBtns() {
             const btns = this.imagesContainerEl.querySelectorAll('.yt-cropper-loader-btn');

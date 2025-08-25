@@ -361,7 +361,7 @@
     function selectImage(image, thumbnailEl) {
         selectedImage.src = image.url || image || image.src;
         if (thumbnailEl) {
-            thumbnailEl.parentNode.querySelector('.selected').classList.remove('selected');
+            thumbnailEl.parentNode.querySelector('.selected')?.classList.remove('selected');
             thumbnailEl.classList.add('selected');
         }
     }
@@ -601,6 +601,48 @@
         }
     }   
 
+    // Turn 'Open Cropper Tool' Button into 'Refresh tool' button
+    const openToolBtnEl = document.querySelector('.yt-cropper-loader-btn');
+
+    if (openToolBtnEl && openToolBtnEl._cropperClickHandler) {
+        openToolBtnEl.removeEventListener('click', openToolBtnEl._cropperClickHandler);
+        delete openToolBtnEl._cropperClickHandler; // optional cleanup
+        openToolBtnEl.addEventListener('click', refreshTool)
+        openToolBtnEl.innerText = 'Refresh tool';
+    }
+    
+    async function refreshTool() {
+        ImageLoader.imageUrls = [];
+        const thumbsEL = document.querySelector('.cropper-tool__thumbnails');
+        thumbsEL.innerHTML = '';
+        ImageLoader.init();
+
+        if (thumbsEL) {
+            // Create a MutationObserver
+            const observer = new MutationObserver((mutationsList, observer) => {
+                for (const mutation of mutationsList) {
+                    // Check if new nodes were added
+                    if (mutation.addedNodes.length > 0) {
+                        for (const node of mutation.addedNodes) {
+                            // Check if the added node is a <span> or contains a <span>
+                            if (node.tagName === 'SPAN' || node.querySelector?.('span')) {
+
+                                const firstImg = document.querySelector('.cropper-tool__thumbnails img');
+                                selectImage(firstImg.src, firstImg.parentNode);
+
+                                // Stop observing after the first addition
+                                observer.disconnect();
+                                return;
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Start observing child node additions
+            observer.observe(thumbsEL, { childList: true, subtree: true });
+        }
+    }
 
     /**
  * Format bytes as human-readable text.
