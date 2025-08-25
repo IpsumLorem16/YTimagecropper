@@ -63,7 +63,7 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
 }
 
 .cropper-tool__form button[type="submit"] {
-    padding: 6px;
+    padding: 6px 11px;
     border-radius: 0px 6px 6px 0px;
     cursor: pointer;
     margin-left: -5px;
