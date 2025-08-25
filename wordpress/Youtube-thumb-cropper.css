@@ -31,11 +31,53 @@ section.cropper-tool.grabbing {
 section.cropper-tool.grabbing .cropper-tool__thumbnails {
     pointer-events: none;
 }
+.cropper-tool__header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 4px;
+}
 
 .cropper-tool__header h2 {
     padding-left: 6px;
     padding-bottom: 6px;
+    margin-right:5px;
 }
+
+.cropper-tool__form {
+    margin-left: auto;
+    display: flex;
+}
+
+.cropper-tool__form input[name="video-url"] {
+    padding: 6px;
+    border-radius: 6px 0px 0px 6px;
+    height: 34px;
+    outline: none;
+    border: none;
+    background: #e5e5e5;
+}
+
+.cropper-tool__form:focus-within input {
+    border: 2px solid #78bafb;
+    border-right: none;
+}
+
+.cropper-tool__form button[type="submit"] {
+    padding: 6px;
+    border-radius: 0px 6px 6px 0px;
+    cursor: pointer;
+    margin-left: -5px;
+    border: none;
+    height: 34px;
+    background: rgb(49 134 157);
+    color: white;
+}
+
+.cropper-tool__form button[type="submit"]:active {
+    background: rgb(39 108 126);
+}
+
+
 
 .cropper-tool__thumbnails {
     padding: 12px;
@@ -46,6 +88,10 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
     margin-bottom:6px;
     user-select: none;
     scrollbar-width: thin;
+}
+
+.cropper-tool__thumbnails[data-thumbnails="3"] {
+    justify-content: space-around;
 }
 
 .cropper-tool__thumbnails img {

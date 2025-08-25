@@ -300,11 +300,10 @@
                 this.inputEl.setCustomValidity("Please enter a valid YouTube URL containing a video ID.");
                 this.inputEl.reportValidity();
             } else {
-                this.inputEl.setCustomValidity(""); // clear any previous error
-                console.log("Valid YouTube URL, video ID:", videoId);
                 const thumbnailURL = `https://i.ytimg.com/vi/${videoId}/maxresdefault.jpg`;
-                console.log(thumbnailURL);
-
+                
+                this.inputEl.setCustomValidity(""); // clear any previous error
+                // console.log("Valid YouTube URL, video ID:", videoId);
                 ImageLoader.updateVideoThumbnails(thumbnailURL);
                 this.clear();
             }
@@ -314,7 +313,6 @@
         },
         init() {
             this.formEl.addEventListener('submit', this.handleSubmit.bind(this));
-
             this.inputEl.addEventListener("input", () => {
                 this.inputEl.setCustomValidity(""); // reset
             });
