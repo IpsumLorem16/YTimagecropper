@@ -1,7 +1,8 @@
 (async function () {
     const isProd = document.body.classList.contains('wp-admin');
     const myApiData = window.myApiData || {};
-    const secretApiKey = myApiData.youtubeApiKey || (await import('./config.local.js')).youtubeApiKey;
+    // let secretApiKey = myApiData.youtubeApiKey || (await import('./config.local.js')).youtubeApiKey || '';
+    let secretApiKey = !window.location.hostname.endsWith('github.io') ? (myApiData?.youtubeApiKey || (await import('./config.local.js')).youtubeApiKey || '') : '';
     const YOUTUBE_API_BASE = 'https://youtube.googleapis.com/youtube/v3/';
     const cropperToolEl = document.getElementById('cropperTool');
     const fileSizeTextEl = document.getElementById('readableSizeText');
