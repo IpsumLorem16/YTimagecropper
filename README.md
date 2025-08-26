@@ -1,8 +1,7 @@
 # YouTube Thumbnail Cropper
+A custom internal tool for scraping YouTube video thumbnails and cropping them to exact dimensions, with adjustable image quality.
 
 <img src="images/screenshot.jpg" width="700">
-
-A custom internal tool for scraping YouTube video thumbnails and cropping them to exact dimensions, with adjustable image quality.
 
 This tool was created to solve the problem of uploading full-size YouTube thumbnails, which would often cut faces in half or trim important text. Previously, each video’s thumbnail URL had to be found manually and edited in Photoshop, which was time-consuming. This tool quickly grabs thumbnails, crops them to preserve faces and text, and adjusts image quality to exact dimensions.
 
