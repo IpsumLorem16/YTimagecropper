@@ -130,6 +130,9 @@ section.cropper-tool.grabbing .cropper-tool__thumbnails {
     width:800px;
     display:block;
     background-color:#979797;
+    touch-action: none;
+    -webkit-user-drag: none;
+    touch-action: none;
 }
 
 .quality-form {

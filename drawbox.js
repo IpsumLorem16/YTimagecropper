@@ -63,8 +63,7 @@
 
     let offsetX = 0;  // Offset for dragging in the X direction
 
-    // mousedown
-    canvas.addEventListener('mousedown', (e) => {
+    function startHandler(e) {
         const { x: mouseX } = getMousePos(e);
 
         if (
@@ -77,12 +76,12 @@
             // cropperToolEl.style.cursor = 'grabbing';
             cropperToolEl.classList.add('grabbing');
         }
-        cropperToolEl.addEventListener('mouseleave', handleCropperToolMouseUp, { once: true });
-        document.body.addEventListener('mouseup', handleCropperToolMouseUp, { once: true });
-    });
+        cropperToolEl.addEventListener('mouseleave', endHandler, { once: true });
+        document.body.addEventListener('mouseup', endHandler, { once: true });
+        window.addEventListener("pointerup", endHandler, { once: true });
+    };
 
-    // mousemove
-    canvas.addEventListener('mousemove', (e) => {
+    function moveHandler(e){
         const { x: mouseX, y: mouseY } = getMousePos(e);
         const isOverBox =
             mouseX >= boxX &&
@@ -93,8 +92,6 @@
         // Change cursor only when hovering over the box
         canvas.style.cursor = isOverBox ? 'grab' : 'default';
 
-
-
         if (isDragging) {
             let newPosition = mouseX - offsetX;
             if (newPosition < 0) { newPosition = 0 }
@@ -104,19 +101,19 @@
             canvas.style.cursor = 'grabbing'
             drawImageWithOverlay();
         }
-    });
+    };
 
-    // mouseup
-    // canvas.addEventListener('mouseup', handleCropperToolMouseUp);
-
-    function handleCropperToolMouseUp() {
+    function endHandler(){
         if (isDragging) {
             isDragging = false;
             captureBoxAsImage();
             // cropperToolEl.style.cursor = 'default';
             cropperToolEl.classList.remove('grabbing');
         }
-    }
+    };
+    // Add event listeners
+    canvas.addEventListener('pointerdown', startHandler);
+    canvas.addEventListener('pointermove', moveHandler);
 
     // Gets relative mouse position, for a canvas resized with CSS.
     function getMousePos(e) {
